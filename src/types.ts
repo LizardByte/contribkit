@@ -75,7 +75,7 @@ export const outputFormats = ['svg', 'png', 'webp', 'json'] as const
 
 export type OutputFormat = typeof outputFormats[number]
 
-export type ProviderName = 'github' | 'patreon' | 'opencollective' | 'afdian' | 'polar' | 'liberapay'
+export type ProviderName = 'github' | 'patreon' | 'opencollective' | 'afdian' | 'polar' | 'liberapay' | 'githubContributors' | 'gitlabContributors' | 'crowdinContributors'
 
 export type GitHubAccountType = 'user' | 'organization'
 
@@ -208,6 +208,79 @@ export interface ProvidersConfig {
      * Will read from `CONTRIBKIT_LIBERAPAY_LOGIN` environment variable if not set.
      */
     login?: string
+  }
+
+  githubContributors?: {
+    /**
+     * User id of your GitHub account.
+     *
+     * Will read from `CONTRIBKIT_GITHUB_CONTRIBUTORS_LOGIN` environment variable if not set.
+     */
+    login?: string
+    /**
+     * GitHub Token that have access to your sponsorships.
+     *
+     * Will read from `CONTRIBKIT_GITHUB_CONTRIBUTORS_TOKEN` environment variable if not set.
+     *
+     * @deprecated It's not recommended set this value directly, pass from env or use `.env` file.
+     */
+    token?: string
+    /**
+     * The minimum number of contributions to be considered a sponsor.
+     *
+     * @default 1
+     */
+    minContributions?: number
+    /**
+     * The repository to fetch contributors from.
+     *
+     * Will read from `CONTRIBKIT_GITHUB_CONTRIBUTORS_REPO` environment variable if not set.
+     */
+    repo?: string
+  }
+
+  gitlabContributors?: {
+    /**
+     * Gitlab Token that have access contributors.
+     *
+     * Will read from `CONTRIBKIT_GITLAB_CONTRIBUTORS_TOKEN` environment variable if not set.
+     *
+     * @deprecated It's not recommended set this value directly, pass from env or use `.env` file.
+     */
+    token?: string
+    /**
+     * The minimum number of contributions to be considered a sponsor.
+     *
+     * @default 1
+     */
+    minContributions?: number
+    /**
+     * The repository ID to fetch contributors from.
+     *
+     * Will read from `CONTRIBKIT_GITLAB_CONTRIBUTORS_REPO_ID` environment variable if not set.
+     */
+    repoId?: number
+  }
+
+  crowdinContributors?: {
+    /**
+     * The Crowdin API token.
+     *
+     * Will read from `CONTRIBKIT_CROWDIN_TOKEN` environment variable if not set.
+     */
+    token?: string
+    /**
+     * The project id on Crowdin.
+     *
+     * Will read from `CONTRIBKIT_CROWDIN_PROJECT_ID` environment variable if not set.
+     */
+    projectId?: number
+    /**
+     * The minimum number of translations to be considered a sponsor.
+     *
+     * @default 100
+     */
+    minTranslations?: number
   }
 }
 

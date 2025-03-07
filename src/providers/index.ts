@@ -1,6 +1,9 @@
 import type { ContribkitConfig, Provider, ProviderName } from '../types'
 import { AfdianProvider } from './afdian'
+import { CrowdinContributorsProvider } from './crowdinContributors'
 import { GitHubProvider } from './github'
+import { GitHubContributorsProvider } from './githubContributors'
+import { GitlabContributorsProvider } from './gitlabContributors'
 import { LiberapayProvider } from './liberapay'
 import { OpenCollectiveProvider } from './opencollective'
 import { PatreonProvider } from './patreon'
@@ -15,6 +18,9 @@ export const ProvidersMap = {
   afdian: AfdianProvider,
   polar: PolarProvider,
   liberapay: LiberapayProvider,
+  githubContributors: GitHubContributorsProvider,
+  gitlabContributors: GitlabContributorsProvider,
+  crowdinContributors: CrowdinContributorsProvider,
 }
 
 export function guessProviders(config: ContribkitConfig) {
@@ -36,6 +42,15 @@ export function guessProviders(config: ContribkitConfig) {
 
   if (config.liberapay && config.liberapay.login)
     items.push('liberapay')
+
+  if (config.githubContributors?.login && config.githubContributors?.token)
+    items.push('githubContributors')
+
+  if (config.gitlabContributors?.token && config.gitlabContributors?.repoId)
+    items.push('gitlabContributors')
+
+  if (config.crowdinContributors?.token && config.crowdinContributors?.projectId)
+    items.push('crowdinContributors')
 
   // fallback
   if (!items.length)

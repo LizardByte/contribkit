@@ -11,18 +11,45 @@ This is a fork of [sponsorkit](https://github.com/antfu-collective/sponsorkit) t
 
 Supports:
 
-- [**GitHub Sponsors**](https://github.com/sponsors)
-- [**Patreon**](https://www.patreon.com/)
-- [**OpenCollective**](https://opencollective.com/)
-- [**Afdian**](https://afdian.com/)
-- [**Polar**](https://polar.sh/)
-- [**Liberapay**](https://liberapay.com/)
+- Contributors:
+  - [**CrowdIn**](https://crowdin.com)
+  - [**GitHub**](https://github.com)
+  - [**Gitlab**](https://gitlab.com)
+- Sponsors:
+  - [**GitHub Sponsors**](https://github.com/sponsors)
+  - [**Patreon**](https://www.patreon.com/)
+  - [**OpenCollective**](https://opencollective.com/)
+  - [**Afdian**](https://afdian.com/)
+  - [**Polar**](https://polar.sh/)
+  - [**Liberapay**](https://liberapay.com/)
 
 ## Usage
 
 Create `.env` file with:
 
 ```ini
+;; Contributors
+
+; CrowdInContributors provider.
+CONTRIBKIT_CROWDIN_TOKEN=
+CONTRIBKIT_CROWDIN_PROJECT_ID=
+CONTRIBKIT_CROWDIN_MIN_TRANSLATIONS=1
+
+; GitHubContributors provider.
+; Token requires the `public_repo` and `read:user` scopes.
+CONTRIBKIT_GITHUB_CONTRIBUTORS_TOKEN=
+CONTRIBKIT_GITHUB_CONTRIBUTORS_LOGIN=
+CONTRIBKIT_GITHUB_CONTRIBUTORS_MIN=1
+CONTRIBKIT_GITHUB_CONTRIBUTORS_REPO=
+
+; GitlabContributors provider.
+; Token requires the `read_api` and `read_user` scopes.
+CONTRIBKIT_GITLAB_CONTRIBUTORS_TOKEN=
+CONTRIBKIT_GITLAB_CONTRIBUTORS_MIN=1
+CONTRIBKIT_GITLAB_CONTRIBUTORS_REPO_ID=
+
+;; Sponsors
+
 ; GitHub provider.
 ; Token requires the `read:user` and `read:org` scopes.
 CONTRIBKIT_GITHUB_TOKEN=
@@ -63,6 +90,11 @@ CONTRIBKIT_LIBERAPAY_LOGIN=
 ```
 
 > Only one provider is required to be configured.
+
+> ![NOTE]
+> The contributor providers are intended to be separated from each other, unlike the sponsor providers.
+> This will require different env variables to be set for each provider, and to be created from separate
+> commands.
 
 Run:
 
