@@ -1,0 +1,9 @@
+# Ignore JetBrains IDE files
+.idea/
+
+# Ignore test coverage
+junit.xml
+coverage/
+
+# this file must not have dist or it will not be published
+!dist/

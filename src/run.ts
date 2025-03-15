@@ -1,5 +1,5 @@
 import type { Buffer } from 'node:buffer'
-import type { SponsorkitConfig, SponsorkitMainConfig, SponsorkitRenderer, SponsorkitRenderOptions, SponsorMatcher, Sponsorship } from './types'
+import type { ContribkitConfig, ContribkitMainConfig, ContribkitRenderer, ContribkitRenderOptions, SponsorMatcher, Sponsorship } from './types'
 import fs from 'node:fs'
 import fsp from 'node:fs/promises'
 import { dirname, join, relative, resolve } from 'node:path'
@@ -28,11 +28,11 @@ function r(path: string) {
   return `./${relative(process.cwd(), path)}`
 }
 
-export async function run(inlineConfig?: SponsorkitConfig, t = consola) {
-  t.log(`\n${c.magenta.bold`SponsorKit`} ${c.dim`v${version}`}\n`)
+export async function run(inlineConfig?: ContribkitConfig, t = consola) {
+  t.log(`\n${c.magenta.bold`ContribKit`} ${c.dim`v${version}`}\n`)
 
   const fullConfig = await loadConfig(inlineConfig)
-  const config = fullConfig as Required<SponsorkitMainConfig>
+  const config = fullConfig as Required<ContribkitMainConfig>
   const dir = resolve(process.cwd(), config.outputDir)
   const cacheFile = resolve(dir, config.cacheFile)
 
@@ -248,9 +248,9 @@ export async function run(inlineConfig?: SponsorkitConfig, t = consola) {
 }
 
 export async function applyRenderer(
-  renderer: SponsorkitRenderer,
-  config: Required<SponsorkitMainConfig>,
-  renderOptions: Required<SponsorkitRenderOptions>,
+  renderer: ContribkitRenderer,
+  config: Required<ContribkitMainConfig>,
+  renderOptions: Required<ContribkitRenderOptions>,
   sponsors: Sponsorship[],
   t = consola,
 ) {
@@ -326,7 +326,7 @@ export async function applyRenderer(
   }
 }
 
-function normalizeReplacements(replaces: SponsorkitMainConfig['replaceLinks']) {
+function normalizeReplacements(replaces: ContribkitMainConfig['replaceLinks']) {
   const array = (Array.isArray(replaces) ? replaces : [replaces]).filter(notNullish)
   const entries = array.map((i) => {
     if (!i)

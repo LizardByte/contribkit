@@ -1,4 +1,4 @@
-import type { Provider, SponsorkitConfig, Sponsorship } from '../types'
+import type { ContribkitConfig, Provider, Sponsorship } from '../types'
 import { createHash } from 'node:crypto'
 import { $fetch } from 'ofetch'
 
@@ -11,7 +11,7 @@ export const AfdianProvider: Provider = {
   },
 }
 
-export async function fetchAfdianSponsors(options: SponsorkitConfig['afdian'] = {}): Promise<Sponsorship[]> {
+export async function fetchAfdianSponsors(options: ContribkitConfig['afdian'] = {}): Promise<Sponsorship[]> {
   const {
     userId,
     token,

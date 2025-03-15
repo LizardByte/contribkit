@@ -29,7 +29,7 @@ export interface TierPartition {
 
 export interface Provider {
   name: string
-  fetchSponsors: (config: SponsorkitConfig) => Promise<Sponsorship[]>
+  fetchSponsors: (config: ContribkitConfig) => Promise<Sponsorship[]>
 }
 
 export interface Sponsor {
@@ -84,13 +84,13 @@ export interface ProvidersConfig {
     /**
      * User id of your GitHub account.
      *
-     * Will read from `SPONSORKIT_GITHUB_LOGIN` environment variable if not set.
+     * Will read from `CONTRIBKIT_GITHUB_LOGIN` environment variable if not set.
      */
     login?: string
     /**
      * GitHub Token that have access to your sponsorships.
      *
-     * Will read from `SPONSORKIT_GITHUB_TOKEN` environment variable if not set.
+     * Will read from `CONTRIBKIT_GITHUB_TOKEN` environment variable if not set.
      *
      * @deprecated It's not recommended set this value directly, pass from env or use `.env` file.
      */
@@ -99,7 +99,7 @@ export interface ProvidersConfig {
      * The account type for sponsorships.
      *
      * Possible values are `user`(default) and `organization`.
-     * Will read from `SPONSORKIT_GITHUB_TYPE` environment variable if not set.
+     * Will read from `CONTRIBKIT_GITHUB_TYPE` environment variable if not set.
      */
     type?: GitHubAccountType
   }
@@ -107,7 +107,7 @@ export interface ProvidersConfig {
     /**
      * Patreon Token that have access to your sponsorships.
      *
-     * Will read from `SPONSORKIT_PATREON_TOKEN` environment variable if not set.
+     * Will read from `CONTRIBKIT_PATREON_TOKEN` environment variable if not set.
      *
      * @deprecated It's not recommended set this value directly, pass from env or use `.env` file.
      */
@@ -117,7 +117,7 @@ export interface ProvidersConfig {
     /**
      * Api key of your OpenCollective account.
      *
-     * Will read from `SPONSORKIT_OPENCOLLECTIVE_KEY` environment variable if not set.
+     * Will read from `CONTRIBKIT_OPENCOLLECTIVE_KEY` environment variable if not set.
      *
      * @deprecated It's not recommended set this value directly, pass from env or use `.env` file.
      */
@@ -125,25 +125,25 @@ export interface ProvidersConfig {
     /**
      * The id of your account.
      *
-     * Will read from `SPONSORKIT_OPENCOLLECTIVE_ID` environment variable if not set.
+     * Will read from `CONTRIBKIT_OPENCOLLECTIVE_ID` environment variable if not set.
      */
     id?: string
     /**
      * The slug of your account.
      *
-     * Will read from `SPONSORKIT_OPENCOLLECTIVE_SLUG` environment variable if not set.
+     * Will read from `CONTRIBKIT_OPENCOLLECTIVE_SLUG` environment variable if not set.
      */
     slug?: string
     /**
      * The GitHub handle of your account.
      *
-     * Will read from `SPONSORKIT_OPENCOLLECTIVE_GH_HANDLE` environment variable if not set.
+     * Will read from `CONTRIBKIT_OPENCOLLECTIVE_GH_HANDLE` environment variable if not set.
      */
     githubHandle?: string
     /*
     * The type of your account. (`collective` or `individual`)
     *
-    * Will read from `SPONSORKIT_OPENCOLLECTIVE_TYPE` environment variable if not set.
+    * Will read from `CONTRIBKIT_OPENCOLLECTIVE_TYPE` environment variable if not set.
     */
     type?: string
   }
@@ -151,7 +151,7 @@ export interface ProvidersConfig {
     /**
      * The userId of your Afdian.
      *
-     * Will read from `SPONSORKIT_AFDIAN_USER_ID` environment variable if not set.
+     * Will read from `CONTRIBKIT_AFDIAN_USER_ID` environment variable if not set.
      *
      * @see https://afdian.net/dashboard/dev
      */
@@ -159,7 +159,7 @@ export interface ProvidersConfig {
     /**
      * Afdian Token that have access to your sponsorships.
      *
-     * Will read from `SPONSORKIT_AFDIAN_TOKEN` environment variable if not set.
+     * Will read from `CONTRIBKIT_AFDIAN_TOKEN` environment variable if not set.
      *
      * @see https://afdian.net/dashboard/dev
      * @deprecated It's not recommended set this value directly, pass from env or use `.env` file.
@@ -187,7 +187,7 @@ export interface ProvidersConfig {
     /**
      * Polar token that have access to your sponsorships.
      *
-     * Will read from `SPONSORKIT_POLAR_TOKEN` environment variable if not set.
+     * Will read from `CONTRIBKIT_POLAR_TOKEN` environment variable if not set.
      *
      * @see https://polar.sh/settings
      * @deprecated It's not recommended set this value directly, pass from env or use `.env` file.
@@ -196,7 +196,7 @@ export interface ProvidersConfig {
     /**
      * The name of the organization to fetch sponsorships from. If not set, it will fetch the sponsorships of the user.
      *
-     * Will read from `SPONSORKIT_POLAR_ORGANIZATION` environment variable if not set.
+     * Will read from `CONTRIBKIT_POLAR_ORGANIZATION` environment variable if not set.
      */
     organization?: string
   }
@@ -205,13 +205,13 @@ export interface ProvidersConfig {
     /**
      * The name of the Liberapay profile.
      *
-     * Will read from `SPONSORKIT_LIBERAPAY_LOGIN` environment variable if not set.
+     * Will read from `CONTRIBKIT_LIBERAPAY_LOGIN` environment variable if not set.
      */
     login?: string
   }
 }
 
-export interface SponsorkitRenderOptions {
+export interface ContribkitRenderOptions {
   /**
    * Name of exported files
    *
@@ -236,7 +236,7 @@ export interface SponsorkitRenderOptions {
   /**
    * Compose the SVG
    */
-  customComposer?: (composer: SvgComposer, sponsors: Sponsorship[], config: SponsorkitConfig) => PromiseLike<void> | void
+  customComposer?: (composer: SvgComposer, sponsors: Sponsorship[], config: ContribkitConfig) => PromiseLike<void> | void
 
   /**
    * Filter of sponsorships to render in the final image.
@@ -310,7 +310,7 @@ export interface SponsorkitRenderOptions {
   onSvgGenerated?: (svg: string) => PromiseLike<string | void | undefined | null> | string | void | undefined | null
 }
 
-export interface SponsorkitConfig extends ProvidersConfig, SponsorkitRenderOptions {
+export interface ContribkitConfig extends ProvidersConfig, ContribkitRenderOptions {
   /**
    * @deprecated use `github.login` instead
    */
@@ -334,14 +334,14 @@ export interface SponsorkitConfig extends ProvidersConfig, SponsorkitRenderOptio
   /**
    * Path to cache file
    *
-   * @default './sponsorkit/.cache.json'
+   * @default './contribkit/.cache.json'
    */
   cacheFile?: string
 
   /**
    * Directory of output files.
    *
-   * @default './sponsorkit'
+   * @default './contribkit'
    */
   outputDir?: string
 
@@ -404,7 +404,7 @@ export interface SponsorkitConfig extends ProvidersConfig, SponsorkitRenderOptio
   /**
    * Configs for multiple renders
    */
-  renders?: SponsorkitRenderOptions[]
+  renders?: ContribkitRenderOptions[]
 
   /**
    * Prorates one-time to the current month's tier
@@ -416,11 +416,11 @@ export interface SponsorMatcher extends Partial<Pick<Sponsor, 'login' | 'name' |
   provider?: ProviderName | string
 }
 
-export type SponsorkitMainConfig = Omit<SponsorkitConfig, keyof SponsorkitRenderOptions>
+export type ContribkitMainConfig = Omit<ContribkitConfig, keyof ContribkitRenderOptions>
 
-export interface SponsorkitRenderer {
+export interface ContribkitRenderer {
   name: string
-  renderSVG: (config: Required<SponsorkitRenderOptions>, sponsors: Sponsorship[]) => Promise<string>
+  renderSVG: (config: Required<ContribkitRenderOptions>, sponsors: Sponsorship[]) => Promise<string>
 }
 
 export interface CircleRenderOptions {
@@ -464,13 +464,13 @@ export interface Tier {
   /**
    * Replace the default composer with your own.
    */
-  compose?: (composer: SvgComposer, sponsors: Sponsorship[], config: SponsorkitConfig) => void
+  compose?: (composer: SvgComposer, sponsors: Sponsorship[], config: ContribkitConfig) => void
   /**
    * Compose the SVG before the main composer.
    */
-  composeBefore?: (composer: SvgComposer, tierSponsors: Sponsorship[], config: SponsorkitConfig) => void
+  composeBefore?: (composer: SvgComposer, tierSponsors: Sponsorship[], config: ContribkitConfig) => void
   /**
    * Compose the SVG after the main composer.
    */
-  composeAfter?: (composer: SvgComposer, tierSponsors: Sponsorship[], config: SponsorkitConfig) => void
+  composeAfter?: (composer: SvgComposer, tierSponsors: Sponsorship[], config: ContribkitConfig) => void
 }

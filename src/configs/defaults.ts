@@ -1,4 +1,4 @@
-import type { SponsorkitConfig, Tier } from '../types'
+import type { ContribkitConfig, Tier } from '../types'
 import { tierPresets } from './tier-presets'
 
 export const defaultTiers: Tier[] = [
@@ -35,18 +35,18 @@ text {
   fill: #777777;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
-.sponsorkit-link {
+.contribkit-link {
   cursor: pointer;
 }
-.sponsorkit-tier-title {
+.contribkit-tier-title {
   font-weight: 500;
   font-size: 20px;
 }
 `
 
-export const defaultConfig: SponsorkitConfig = {
+export const defaultConfig: ContribkitConfig = {
   width: 800,
-  outputDir: './sponsorkit',
+  outputDir: './contribkit',
   cacheFile: '.cache.json',
   formats: ['json', 'svg', 'png'],
   tiers: defaultTiers,

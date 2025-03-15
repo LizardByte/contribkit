@@ -1,4 +1,4 @@
-import type { SponsorkitConfig, Sponsorship, Tier, TierPartition } from '../types'
+import type { ContribkitConfig, Sponsorship, Tier, TierPartition } from '../types'
 import { loadConfig as _loadConfig } from 'unconfig'
 import { defaultConfig } from './defaults'
 import { loadEnv } from './env'
@@ -8,20 +8,20 @@ export * from './defaults'
 export * from './fallback'
 export * from './tier-presets'
 
-export function defineConfig(config: SponsorkitConfig): SponsorkitConfig {
+export function defineConfig(config: ContribkitConfig): ContribkitConfig {
   return config
 }
 
-export async function loadConfig(inlineConfig: SponsorkitConfig = {}): Promise<Required<SponsorkitConfig>> {
+export async function loadConfig(inlineConfig: ContribkitConfig = {}): Promise<Required<ContribkitConfig>> {
   const env = loadEnv()
 
-  const { config = {} } = await _loadConfig<SponsorkitConfig>({
+  const { config = {} } = await _loadConfig<ContribkitConfig>({
     sources: [
       {
-        files: 'sponsor.config',
+        files: 'sponsorkit.config',
       },
       {
-        files: 'sponsorkit.config',
+        files: 'contribkit.config',
       },
     ],
     merge: true,
@@ -56,7 +56,7 @@ export async function loadConfig(inlineConfig: SponsorkitConfig = {}): Promise<R
       ...config.afdian,
       ...inlineConfig.afdian,
     },
-  } as Required<SponsorkitConfig>
+  } as Required<ContribkitConfig>
 
   return resolved
 }

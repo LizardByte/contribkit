@@ -1,8 +1,8 @@
-import type { SponsorkitRenderer, Sponsorship } from '../types'
+import type { ContribkitRenderer, Sponsorship } from '../types'
 import { generateBadge, SvgComposer } from '../processing/svg'
 
-export const circlesRenderer: SponsorkitRenderer = {
-  name: 'sponsorkit:circles',
+export const circlesRenderer: ContribkitRenderer = {
+  name: 'contribkit:circles',
   async renderSVG(config, sponsors) {
     const { hierarchy, pack } = await import('d3-hierarchy')
     const composer = new SvgComposer(config)

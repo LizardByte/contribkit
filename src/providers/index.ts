@@ -1,4 +1,4 @@
-import type { Provider, ProviderName, SponsorkitConfig } from '../types'
+import type { ContribkitConfig, Provider, ProviderName } from '../types'
 import { AfdianProvider } from './afdian'
 import { GitHubProvider } from './github'
 import { LiberapayProvider } from './liberapay'
@@ -17,7 +17,7 @@ export const ProvidersMap = {
   liberapay: LiberapayProvider,
 }
 
-export function guessProviders(config: SponsorkitConfig) {
+export function guessProviders(config: ContribkitConfig) {
   const items: ProviderName[] = []
   if (config.github && config.github.login)
     items.push('github')
@@ -57,7 +57,7 @@ export function resolveProviders(names: (ProviderName | Provider)[]) {
     })
 }
 
-export async function fetchSponsors(config: SponsorkitConfig) {
+export async function fetchSponsors(config: ContribkitConfig) {
   const providers = resolveProviders(guessProviders(config))
   const sponsorships = await Promise.all(
     providers.map(provider => provider.fetchSponsors(config)),
