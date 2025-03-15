@@ -1,4 +1,4 @@
-import { defineConfig, tierPresets } from 'sponsorkit'
+import { defineConfig, tierPresets } from 'contribkit'
 
 export default defineConfig({
   // includePrivate: true,

@@ -1,4 +1,4 @@
-import type { ImageFormat, SponsorkitConfig, Sponsorship } from '../types'
+import type { ContribkitConfig, ImageFormat, Sponsorship } from '../types'
 import { Buffer } from 'node:buffer'
 import { consola } from 'consola'
 import { $fetch } from 'ofetch'
@@ -9,7 +9,7 @@ async function fetchImage(url: string) {
   const arrayBuffer = await $fetch(url, {
     responseType: 'arrayBuffer',
     headers: {
-      'User-Agent': `Mozilla/5.0 Chrome/124.0.0.0 Safari/537.36 Sponsorkit/${version}`,
+      'User-Agent': `Mozilla/5.0 Chrome/124.0.0.0 Safari/537.36 Contribkit/${version}`,
     },
   })
   return Buffer.from(arrayBuffer)
@@ -17,7 +17,7 @@ async function fetchImage(url: string) {
 
 export async function resolveAvatars(
   ships: Sponsorship[],
-  getFallbackAvatar: SponsorkitConfig['fallbackAvatar'],
+  getFallbackAvatar: ContribkitConfig['fallbackAvatar'],
   t = consola,
 ) {
   const fallbackAvatar = await (() => {

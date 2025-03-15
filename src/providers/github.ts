@@ -1,4 +1,4 @@
-import type { GitHubAccountType, Provider, SponsorkitConfig, Sponsorship, Tier } from '../types'
+import type { ContribkitConfig, GitHubAccountType, Provider, Sponsorship, Tier } from '../types'
 import { $fetch } from 'ofetch'
 import { normalizeUrl } from '../utils'
 
@@ -53,7 +53,7 @@ export async function fetchGitHubSponsors(
   token: string,
   login: string,
   type: GitHubAccountType,
-  config: SponsorkitConfig,
+  config: ContribkitConfig,
 ): Promise<Sponsorship[]> {
   if (!token)
     throw new Error('GitHub token is required')

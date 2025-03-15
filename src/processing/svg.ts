@@ -1,4 +1,4 @@
-import type { BadgePreset, ImageFormat, Sponsor, SponsorkitRenderOptions, Sponsorship } from '../types'
+import type { BadgePreset, ContribkitRenderOptions, ImageFormat, Sponsor, Sponsorship } from '../types'
 import { resizeImage } from './image'
 
 let id = 0
@@ -51,9 +51,9 @@ export async function generateBadge(
 
   const avatarBase64 = avatar.toString('base64')
 
-  return `<a ${url ? `href="${url}" ` : ''}class="${preset.classes || 'sponsorkit-link'}" target="_blank" id="${login}">
+  return `<a ${url ? `href="${url}" ` : ''}class="${preset.classes || 'contribkit-link'}" target="_blank" id="${login}">
   ${preset.name
-    ? `<text x="${x + size / 2}" y="${y + size + 18}" text-anchor="middle" class="${preset.name.classes || 'sponsorkit-name'}" fill="${preset.name.color || 'currentColor'}">${encodeHtmlEntities(name)}</text>
+    ? `<text x="${x + size / 2}" y="${y + size + 18}" text-anchor="middle" class="${preset.name.classes || 'contribkit-name'}" fill="${preset.name.color || 'currentColor'}">${encodeHtmlEntities(name)}</text>
   `
     : ''}${genSvgImage(x, y, size, radius, avatarBase64, imageFormat)}
 </a>`.trim()
@@ -63,14 +63,14 @@ export class SvgComposer {
   height = 0
   body = ''
 
-  constructor(public readonly config: Required<SponsorkitRenderOptions>) {}
+  constructor(public readonly config: Required<ContribkitRenderOptions>) {}
 
   addSpan(height = 0) {
     this.height += height
     return this
   }
 
-  addTitle(text: string, classes = 'sponsorkit-tier-title') {
+  addTitle(text: string, classes = 'contribkit-tier-title') {
     return this.addText(text, classes)
   }
 

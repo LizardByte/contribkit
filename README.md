@@ -1,8 +1,13 @@
-# SponsorKit
+# ContribKit
 
-[![NPM version](https://img.shields.io/npm/v/sponsorkit?color=a1b858&label=)](https://www.npmjs.com/package/sponsorkit)
+[![GitHub stars](https://img.shields.io/github/stars/lizardbyte/contribkit.svg?logo=github&style=for-the-badge)](https://github.com/LizardByte/contribkit)
+[![GitHub Workflow Status (CI)](https://img.shields.io/github/actions/workflow/status/lizardbyte/contribkit/ci.yml.svg?branch=master&label=CI%20build&logo=github&style=for-the-badge)](https://github.com/LizardByte/contribkit/actions/workflows/CI.yml?query=branch%3Amaster)
+[![Codecov](https://img.shields.io/codecov/c/gh/LizardByte/contribkit?token=1234&style=for-the-badge&logo=codecov&label=codecov)](https://codecov.io/gh/LizardByte/contribkit)
+[![NPM Monthly Downloads](https://img.shields.io/npm/dm/%40lizardbyte%2Fcontribkit?style=for-the-badge&logo=npm&label=npm%20downloads/m)](https://www.npmjs.com/package/@lizardbyte/contribkit)
+[![NPM Version](https://img.shields.io/npm/v/%40lizardbyte%2Fcontribkit?style=for-the-badge&logo=npm&label=npm%20version)](https://www.npmjs.com/package/@lizardbyte/contribkit)
 
-Toolkit for fetching sponsors info and generating sponsors images.
+Toolkit for fetching contributor info and generating contributor images.
+This is a fork of [sponsorkit](https://github.com/antfu-collective/sponsorkit) that supports contributors.
 
 Supports:
 
@@ -20,41 +25,41 @@ Create `.env` file with:
 ```ini
 ; GitHub provider.
 ; Token requires the `read:user` and `read:org` scopes.
-SPONSORKIT_GITHUB_TOKEN=
-SPONSORKIT_GITHUB_LOGIN=
+CONTRIBKIT_GITHUB_TOKEN=
+CONTRIBKIT_GITHUB_LOGIN=
 
 ; Patreon provider.
 ; Create v2 API key at https://www.patreon.com/portal/registration/register-clients
 ; and use the "Creator’s Access Token".
-SPONSORKIT_PATREON_TOKEN=
+CONTRIBKIT_PATREON_TOKEN=
 
 ; OpenCollective provider.
 ; Create an API key at https://opencollective.com/applications
-SPONSORKIT_OPENCOLLECTIVE_KEY=
+CONTRIBKIT_OPENCOLLECTIVE_KEY=
 ; and provide the ID, slug or GitHub handle of your account.
-SPONSORKIT_OPENCOLLECTIVE_ID=
+CONTRIBKIT_OPENCOLLECTIVE_ID=
 ; or
-SPONSORKIT_OPENCOLLECTIVE_SLUG=
+CONTRIBKIT_OPENCOLLECTIVE_SLUG=
 ; or
-SPONSORKIT_OPENCOLLECTIVE_GH_HANDLE=
+CONTRIBKIT_OPENCOLLECTIVE_GH_HANDLE=
 ; If it is a personal account, set it to `person`. Otherwise not set or set to `collective`
-SPONSORKIT_OPENCOLLECTIVE_TYPE=
+CONTRIBKIT_OPENCOLLECTIVE_TYPE=
 
 ; Afdian provider.
 ; Get user_id at https://afdian.com/dashboard/dev
-SPONSORKIT_AFDIAN_USER_ID=
+CONTRIBKIT_AFDIAN_USER_ID=
 ; Create token at https://afdian.com/dashboard/dev
-SPONSORKIT_AFDIAN_TOKEN=
+CONTRIBKIT_AFDIAN_TOKEN=
 
 ; Polar provider.
 ; Get your token at https://polar.sh/settings
-SPONSORKIT_POLAR_TOKEN=
+CONTRIBKIT_POLAR_TOKEN=
 ; The name of the organization to fetch sponsorships from.
-SPONSORKIT_POLAR_ORGANIZATION=
+CONTRIBKIT_POLAR_ORGANIZATION=
 
 ; Liberapay provider.
 ; The name of the profile.
-SPONSORKIT_LIBERAPAY_LOGIN=
+CONTRIBKIT_LIBERAPAY_LOGIN=
 ```
 
 > Only one provider is required to be configured.
@@ -62,17 +67,17 @@ SPONSORKIT_LIBERAPAY_LOGIN=
 Run:
 
 ```base
-npx sponsorkit
+npx contribkit
 ```
 
 [Example Setup](./example/) | [GitHub Actions Setup](https://github.com/antfu/static/blob/master/.github/workflows/scheduler.yml) | [Generated SVG](https://cdn.jsdelivr.net/gh/antfu/static/sponsors.svg)
 
 ### Configurations
 
-Create `sponsorkit.config.js` file with:
+Create `contribkit.config.js` file with:
 
 ```ts
-import { defineConfig, tierPresets } from 'sponsorkit'
+import { defineConfig, tierPresets } from '@lizardbyte/contribkit'
 
 export default defineConfig({
   // Providers configs
@@ -135,10 +140,10 @@ Also check [the example](./example/).
 
 ### Programmatic Utilities
 
-You can also use SponsorKit programmatically:
+You can also use ContribKit programmatically:
 
 ```ts
-import { fetchSponsors } from 'sponsorkit'
+import { fetchSponsors } from '@lizardbyte/contribkit'
 
 const sponsors = await fetchSponsors({
   github: {
@@ -193,7 +198,7 @@ export default defineConfig({
 We also support rendering multiple images at once with different configurations, via `renders` field:
 
 ```ts
-import { defineConfig, tierPresets } from 'sponsorkit'
+import { defineConfig, tierPresets } from '@lizardbyte/contribkit'
 
 export default defineConfig({
   // Providers configs
@@ -224,7 +229,3 @@ export default defineConfig({
   ],
 })
 ```
-
-## License
-
-[MIT](./LICENSE) License © 2022 [Anthony Fu](https://github.com/antfu)
