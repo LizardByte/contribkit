@@ -13,7 +13,6 @@
   "bugs": {
     "url": "https://github.com/LizardByte/contribkit/issues"
   },
-  "packageManager": "pnpm@10.6.1",
   "keywords": [
     "contributors",
     "sponsors",
