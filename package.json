@@ -46,6 +46,7 @@
     "release": "bumpp && pnpm publish"
   },
   "dependencies": {
+    "@crowdin/crowdin-api-client": "^1.41.2",
     "ansis": "^3.17.0",
     "cac": "^6.7.14",
     "consola": "^3.4.0",

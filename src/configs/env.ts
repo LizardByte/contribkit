@@ -41,6 +41,22 @@ export function loadEnv(): Partial<ContribkitConfig> {
       login: process.env.CONTRIBKIT_LIBERAPAY_LOGIN || process.env.LIBERAPAY_LOGIN,
     },
     outputDir: process.env.CONTRIBKIT_DIR,
+    githubContributors: {
+      login: process.env.CONTRIBKIT_GITHUB_CONTRIBUTORS_LOGIN,
+      token: process.env.CONTRIBKIT_GITHUB_CONTRIBUTORS_TOKEN,
+      minContributions: Number(process.env.CONTRIBKIT_GITHUB_CONTRIBUTORS_MIN) || 1,
+      repo: process.env.CONTRIBKIT_GITHUB_CONTRIBUTORS_REPO,
+    },
+    gitlabContributors: {
+      token: process.env.CONTRIBKIT_GITLAB_CONTRIBUTORS_TOKEN,
+      minContributions: Number(process.env.CONTRIBKIT_GITLAB_CONTRIBUTORS_MIN) || 1,
+      repoId: Number(process.env.CONTRIBKIT_GITLAB_CONTRIBUTORS_REPO_ID),
+    },
+    crowdinContributors: {
+      token: process.env.CONTRIBKIT_CROWDIN_TOKEN,
+      projectId: Number(process.env.CONTRIBKIT_CROWDIN_PROJECT_ID),
+      minTranslations: Number(process.env.CONTRIBKIT_CROWDIN_MIN_TRANSLATIONS) || 1,
+    },
   }
 
   // remove undefined keys

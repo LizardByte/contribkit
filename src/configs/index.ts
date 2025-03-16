@@ -18,10 +18,16 @@ export async function loadConfig(inlineConfig: ContribkitConfig = {}): Promise<R
   const { config = {} } = await _loadConfig<ContribkitConfig>({
     sources: [
       {
-        files: 'sponsorkit.config',
+        files: 'contrib.config',
       },
       {
         files: 'contribkit.config',
+      },
+      {
+        files: 'sponsor.config',
+      },
+      {
+        files: 'sponsorkit.config',
       },
     ],
     merge: true,
