@@ -31,7 +31,7 @@ export function loadEnv(): Partial<ContribkitConfig> {
     afdian: {
       userId: process.env.CONTRIBKIT_AFDIAN_USER_ID || process.env.AFDIAN_USER_ID,
       token: process.env.CONTRIBKIT_AFDIAN_TOKEN || process.env.AFDIAN_TOKEN,
-      exechangeRate: Number.parseFloat(process.env.CONTRIBKIT_AFDIAN_EXECHANGERATE || process.env.AFDIAN_EXECHANGERATE || '0') || undefined,
+      exchangeRate: Number.parseFloat(process.env.CONTRIBKIT_AFDIAN_EXCHANGE_RATE || process.env.AFDIAN_EXCHANGE_RATE || '0') || undefined,
     },
     polar: {
       token: process.env.CONTRIBKIT_POLAR_TOKEN || process.env.POLAR_TOKEN,
