@@ -75,7 +75,7 @@ export const outputFormats = ['svg', 'png', 'webp', 'json'] as const
 
 export type OutputFormat = typeof outputFormats[number]
 
-export type ProviderName = 'github' | 'patreon' | 'opencollective' | 'afdian' | 'polar' | 'liberapay' | 'githubContributors' | 'gitlabContributors' | 'crowdinContributors'
+export type ProviderName = 'github' | 'patreon' | 'opencollective' | 'afdian' | 'polar' | 'liberapay' | 'githubContributors' | 'gitlabContributors' | 'crowdinContributors' | 'githubContributions'
 
 export type GitHubAccountType = 'user' | 'organization'
 
@@ -281,6 +281,37 @@ export interface ProvidersConfig {
      * @default 100
      */
     minTranslations?: number
+  }
+
+  githubContributions?: {
+    /**
+     * GitHub user login to fetch contributions for.
+     *
+     * Will read from `CONTRIBKIT_GITHUB_CONTRIBUTIONS_LOGIN` environment variable if not set.
+     */
+    login?: string
+    /**
+     * GitHub Token that has access to read user contributions.
+     *
+     * Will read from `CONTRIBKIT_GITHUB_CONTRIBUTIONS_TOKEN` environment variable if not set.
+     *
+     * @deprecated It's not recommended set this value directly, pass from env or use `.env` file.
+     */
+    token?: string
+    /**
+     * Cap the maximum contribution count per organization/user.
+     * Useful to prevent one dominant contributor from overshadowing others in visualizations.
+     *
+     * @example 100 // Cap all contributions at 100 PRs max
+     */
+    maxContributions?: number
+    /**
+     * Apply logarithmic scaling to contribution counts.
+     * Useful to reduce the visual dominance of high contributors while maintaining relative differences.
+     *
+     * @default false
+     */
+    logarithmicScaling?: boolean
   }
 }
 

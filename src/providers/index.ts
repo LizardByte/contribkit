@@ -3,6 +3,7 @@ import { AfdianProvider } from './afdian'
 import { CrowdinContributorsProvider } from './crowdinContributors'
 import { GitHubProvider } from './github'
 import { GitHubContributorsProvider } from './githubContributors'
+import { GitHubContributionsProvider } from './githubContributions'
 import { GitlabContributorsProvider } from './gitlabContributors'
 import { LiberapayProvider } from './liberapay'
 import { OpenCollectiveProvider } from './opencollective'
@@ -19,6 +20,7 @@ export const ProvidersMap = {
   polar: PolarProvider,
   liberapay: LiberapayProvider,
   githubContributors: GitHubContributorsProvider,
+  githubContributions: GitHubContributionsProvider,
   gitlabContributors: GitlabContributorsProvider,
   crowdinContributors: CrowdinContributorsProvider,
 }
@@ -45,6 +47,9 @@ export function guessProviders(config: ContribkitConfig) {
 
   if (config.githubContributors?.login && config.githubContributors?.token)
     items.push('githubContributors')
+
+  if (config.githubContributions?.login && config.githubContributions?.token)
+    items.push('githubContributions')
 
   if (config.gitlabContributors?.token && config.gitlabContributors?.repoId)
     items.push('gitlabContributors')

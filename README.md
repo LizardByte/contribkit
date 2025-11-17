@@ -13,7 +13,8 @@ Supports:
 
 - Contributors:
   - [**CrowdIn**](https://crowdin.com)
-  - [**GitHub**](https://github.com)
+  - [**GitHub Contributors**](https://github.com) (contributors to a specific repository)
+  - [**GitHub Contributions**](https://github.com) (merged PRs aggregated by repository owner across all repos for a single user)
   - [**Gitlab**](https://gitlab.com)
 - Sponsors:
   - [**GitHub Sponsors**](https://github.com/sponsors)
@@ -37,10 +38,24 @@ CONTRIBKIT_CROWDIN_MIN_TRANSLATIONS=1
 
 ; GitHubContributors provider.
 ; Token requires the `public_repo` and `read:user` scopes.
+; This provider tracks all contributors to a specific repository.
 CONTRIBKIT_GITHUB_CONTRIBUTORS_TOKEN=
 CONTRIBKIT_GITHUB_CONTRIBUTORS_LOGIN=
 CONTRIBKIT_GITHUB_CONTRIBUTORS_MIN=1
 CONTRIBKIT_GITHUB_CONTRIBUTORS_REPO=
+
+; GitHubContributions provider.
+; Token requires the `read:user` scope.
+; This provider aggregates merged pull requests across all repositories by repository owner (user or organization).
+; Each owner appears once with the total merged PRs you authored to their repos.
+; Avatar and link point to the owner (or to the repo if only one repo per owner).
+; Only merged PRs are counted - open or closed-without-merge PRs are excluded.
+CONTRIBKIT_GITHUB_CONTRIBUTIONS_TOKEN=
+CONTRIBKIT_GITHUB_CONTRIBUTIONS_LOGIN=
+; Optional: Cap the maximum contribution count per org/user (useful for circles visualization)
+CONTRIBKIT_GITHUB_CONTRIBUTIONS_MAX=
+; Optional: Apply logarithmic scaling to reduce dominance of high contributors (true/false)
+CONTRIBKIT_GITHUB_CONTRIBUTIONS_LOGARITHMIC=
 
 ; GitlabContributors provider.
 ; Token requires the `read_api` and `read_user` scopes.
@@ -96,9 +111,26 @@ CONTRIBKIT_LIBERAPAY_LOGIN=
 > This will require different env variables to be set for each provider, and to be created from separate
 > commands.
 
+#### GitHub Provider Options
+
+There are two GitHub contributor providers available:
+
+- **GitHubContributors**: Tracks all contributors to a specific repository (e.g., `owner/repo`). Each contributor appears once with their actual contribution count to that repository.
+- **GitHubContributions**: Aggregates a single user's **merged pull requests** across all repositories, grouped by repository owner (user or organization). Each owner appears once with the total merged PRs. The avatar and link point to the owner (or to the specific repo if only one repo per owner).
+
+Use **GitHubContributors** when you want to showcase everyone who has contributed to your project with their contribution counts.
+Use **GitHubContributions** when you want to understand where a single user's completed contributions (merged PRs) have gone, without overwhelming duplicates per repo under the same owner.
+
+**GitHubContributions accuracy**:
+- Counts only **merged** pull requests - open or closed-without-merge PRs are excluded
+- Discovers repos via **2 sources**:
+  1. **contributionsCollection** - Yearly commit timeline (full history) for discovering repositories you have committed to
+  2. **Search API** - Repositories where you have merged PRs (`is:pr is:merged author:login`)
+- When an owner has only one repo, the link points to that repo; otherwise to the owner profile
+
 Run:
 
-```base
+```bash
 npx contribkit
 ```
 
@@ -131,6 +163,11 @@ export default defineConfig({
   },
   liberapay: {
     // ...
+  },
+
+  // For contributor providers:
+  githubContributions: {
+    login: 'username',
   },
 
   // Rendering configs
