@@ -1,7 +1,7 @@
 # ContribKit
 
 [![GitHub stars](https://img.shields.io/github/stars/lizardbyte/contribkit.svg?logo=github&style=for-the-badge)](https://github.com/LizardByte/contribkit)
-[![GitHub Workflow Status (CI)](https://img.shields.io/github/actions/workflow/status/lizardbyte/contribkit/ci.yml.svg?branch=master&label=CI%20build&logo=github&style=for-the-badge)](https://github.com/LizardByte/contribkit/actions/workflows/CI.yml?query=branch%3Amaster)
+[![GitHub Workflow Status (CI)](https://img.shields.io/github/actions/workflow/status/lizardbyte/contribkit/_ci-node.yml.svg?branch=master&label=CI%20build&logo=github&style=for-the-badge)](https://github.com/LizardByte/contribkit/actions/workflows/CI.yml?query=branch%3Amaster)
 [![Codecov](https://img.shields.io/codecov/c/gh/LizardByte/contribkit?token=WBivqQDwFw&style=for-the-badge&logo=codecov&label=codecov)](https://codecov.io/gh/LizardByte/contribkit)
 [![NPM Monthly Downloads](https://img.shields.io/npm/dm/%40lizardbyte%2Fcontribkit?style=for-the-badge&logo=npm&label=npm%20downloads/m)](https://www.npmjs.com/package/@lizardbyte/contribkit)
 [![NPM Version](https://img.shields.io/npm/v/%40lizardbyte%2Fcontribkit?style=for-the-badge&logo=npm&label=npm%20version)](https://www.npmjs.com/package/@lizardbyte/contribkit)
