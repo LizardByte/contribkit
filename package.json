@@ -27,7 +27,7 @@
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.mts",
   "bin": {
-    "contribkit": "./bin/contribkit.mjs"
+    "contribkit": "bin/contribkit.mjs"
   },
   "files": [
     "bin",
