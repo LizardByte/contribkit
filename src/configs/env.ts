@@ -57,6 +57,12 @@ export function loadEnv(): Partial<ContribkitConfig> {
       projectId: Number(process.env.CONTRIBKIT_CROWDIN_PROJECT_ID),
       minTranslations: Number(process.env.CONTRIBKIT_CROWDIN_MIN_TRANSLATIONS) || 1,
     },
+    githubContributions: {
+      login: process.env.CONTRIBKIT_GITHUB_CONTRIBUTIONS_LOGIN,
+      token: process.env.CONTRIBKIT_GITHUB_CONTRIBUTIONS_TOKEN,
+      maxContributions: Number(process.env.CONTRIBKIT_GITHUB_CONTRIBUTIONS_MAX) || undefined,
+      logarithmicScaling: process.env.CONTRIBKIT_GITHUB_CONTRIBUTIONS_LOGARITHMIC === 'true',
+    },
   }
 
   // remove undefined keys

@@ -10,7 +10,9 @@ export function genSvgImage(
   base64Image: string,
   imageFormat: ImageFormat,
 ) {
-  const cropId = `c${crypto.createHash('md5').update(base64Image).digest('hex').slice(0, 6)}`
+  // Unique clipPath id per element, ensuring duplicated images are properly rendered.
+  const hashInput = `${x}:${y}:${size}:${radius}:${base64Image}`
+  const cropId = `c${crypto.createHash('sha256').update(hashInput).digest('hex').slice(0, 6)}`
   return `
   <clipPath id="${cropId}">
     <rect x="${x}" y="${y}" width="${size}" height="${size}" rx="${size * radius}" ry="${size * radius}" />
