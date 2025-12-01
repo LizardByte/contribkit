@@ -5,7 +5,7 @@
     "module": "esnext",
     "moduleResolution": "node",
     "paths": {
-      "contribrkit": [
+      "contribkit": [
         "./src/index.ts"
       ]
     },

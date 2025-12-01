@@ -37,11 +37,11 @@
     "build": "unbuild",
     "stub": "unbuild --stub",
     "dev": "esno src/cli.ts",
-    "test": "npm-run-all test:unit test:report test:lint",
+    "test": "npm-run-all test:unit test:report test:lint test:typecheck",
     "test:unit": "jest --coverage",
     "test:report": "jest --reporters=jest-junit",
     "test:lint": "eslint .",
-    "typecheck": "tsc --noEmit",
+    "test:typecheck": "tsc --noEmit",
     "prepublishOnly": "nr build",
     "release": "bumpp && pnpm publish"
   },
