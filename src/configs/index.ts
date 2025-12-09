@@ -33,7 +33,7 @@ export async function loadConfig(inlineConfig: ContribkitConfig = {}): Promise<R
     merge: true,
   })
 
-  const hasNegativeTier = !!config.tiers?.find(tier => tier && tier.monthlyDollars! <= 0)
+  const hasNegativeTier = !!config.tiers?.find((tier: Tier) => tier && tier.monthlyDollars! <= 0)
 
   const resolved = {
     fallbackAvatar: FALLBACK_AVATAR,
