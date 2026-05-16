@@ -60,7 +60,7 @@
     "@antfu/utils": "^9.1.0",
     "@babel/core": "7.29.0",
     "@babel/preset-env": "7.29.5",
-    "@codecov/webpack-plugin": "1.9.1",
+    "@codecov/webpack-plugin": "2.0.1",
     "@eslint/js": "^10.0.1",
     "@fast-csv/parse": "^5.0.2",
     "@types/d3-hierarchy": "^3.1.7",
