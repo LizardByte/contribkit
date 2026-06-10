@@ -45,12 +45,13 @@ text {
 `
 
 export const defaultConfig: ContribkitConfig = {
+  mode: 'sponsors',
   width: 800,
   outputDir: './contribkit',
   cacheFile: '.cache.json',
+  cacheFileSponsees: '.cache.sponsees.json',
   formats: ['json', 'svg', 'png'],
   tiers: defaultTiers,
-  name: 'sponsors',
   includePrivate: false,
   svgInlineCSS: defaultInlineCSS,
 }

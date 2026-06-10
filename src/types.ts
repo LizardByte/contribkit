@@ -78,6 +78,7 @@ export type OutputFormat = typeof outputFormats[number]
 export type ProviderName = 'github' | 'patreon' | 'opencollective' | 'afdian' | 'polar' | 'liberapay' | 'githubContributors' | 'gitlabContributors' | 'crowdinContributors' | 'githubContributions'
 
 export type GitHubAccountType = 'user' | 'organization'
+export type SponsorshipMode = 'sponsors' | 'sponsees'
 
 export interface ProvidersConfig {
   github?: {
@@ -319,7 +320,7 @@ export interface ContribkitRenderOptions {
   /**
    * Name of exported files
    *
-   * @default 'sponsors'
+   * @default config.mode
    */
   name?: string
 
@@ -416,6 +417,15 @@ export interface ContribkitRenderOptions {
 
 export interface ContribkitConfig extends ProvidersConfig, ContribkitRenderOptions {
   /**
+   * Data mode:
+   * - `sponsors`: people sponsoring you
+   * - `sponsees`: people you have sponsored, including past sponsorships
+   *
+   * @default 'sponsors'
+   */
+  mode?: SponsorshipMode
+
+  /**
    * @deprecated use `github.login` instead
    */
   login?: string
@@ -441,6 +451,13 @@ export interface ContribkitConfig extends ProvidersConfig, ContribkitRenderOptio
    * @default './contribkit/.cache.json'
    */
   cacheFile?: string
+
+  /**
+   * Path to cache file used when `mode` is `sponsees`.
+   *
+   * @default './contribkit/.cache.sponsees.json'
+   */
+  cacheFileSponsees?: string
 
   /**
    * Directory of output files.
