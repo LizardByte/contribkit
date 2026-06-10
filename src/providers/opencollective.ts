@@ -1,5 +1,6 @@
 import type { Provider, Sponsorship } from '../types'
 import { $fetch } from 'ofetch'
+import { getCredentials } from '../configs/credentials'
 import { normalizeUrl } from '../utils'
 
 interface SocialLink {
@@ -13,7 +14,7 @@ export const OpenCollectiveProvider: Provider = {
     if (config.mode === 'sponsees') {
       const slug = config.opencollective?.slug || config.opencollective?.id
       return fetchOpenCollectiveSponsors(
-        config.opencollective?.key,
+        getCredentials(config).opencollective?.key,
         undefined,
         slug,
         config.opencollective?.githubHandle,
@@ -23,7 +24,7 @@ export const OpenCollectiveProvider: Provider = {
     }
 
     return fetchOpenCollectiveSponsors(
-      config.opencollective?.key,
+      getCredentials(config).opencollective?.key,
       config.opencollective?.id,
       config.opencollective?.slug,
       config.opencollective?.githubHandle,

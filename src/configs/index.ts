@@ -14,6 +14,7 @@ export function defineConfig(config: ContribkitConfig): ContribkitConfig {
 
 export async function loadConfig(inlineConfig: ContribkitConfig = {}): Promise<Required<ContribkitConfig>> {
   const env = loadEnv()
+  const envConfig = env.config
 
   const { config = {} } = await _loadConfig<ContribkitConfig>({
     sources: [
@@ -39,35 +40,36 @@ export async function loadConfig(inlineConfig: ContribkitConfig = {}): Promise<R
     fallbackAvatar: FALLBACK_AVATAR,
     includePastSponsors: hasNegativeTier,
     ...defaultConfig,
-    ...env,
+    ...envConfig,
     ...config,
     ...inlineConfig,
     github: {
-      ...env.github,
+      ...envConfig.github,
       ...config.github,
       ...inlineConfig.github,
     },
     patreon: {
-      ...env.patreon,
+      ...envConfig.patreon,
       ...config.patreon,
       ...inlineConfig.patreon,
     },
     opencollective: {
-      ...env.opencollective,
+      ...envConfig.opencollective,
       ...config.opencollective,
       ...inlineConfig.opencollective,
     },
     afdian: {
-      ...env.afdian,
+      ...envConfig.afdian,
       ...config.afdian,
       ...inlineConfig.afdian,
     },
+    credentials: env.credentials,
   } as Required<ContribkitConfig>
 
   if (!['sponsors', 'sponsees'].includes(resolved.mode))
     throw new Error(`Invalid mode: ${resolved.mode}. Expected "sponsors" or "sponsees".`)
 
-  resolved.name = inlineConfig.name || config.name || env.name || resolved.mode
+  resolved.name = inlineConfig.name || config.name || envConfig.name || resolved.mode
 
   return resolved
 }

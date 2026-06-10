@@ -1,4 +1,5 @@
 import type { ContribkitConfig, Provider, ProviderName } from '../types'
+import { getCredentials } from '../configs/credentials'
 import { AfdianProvider } from './afdian'
 import { CrowdinContributorsProvider } from './crowdinContributors'
 import { GitHubProvider } from './github'
@@ -27,31 +28,32 @@ export const ProvidersMap = {
 
 export function guessProviders(config: ContribkitConfig) {
   const items: ProviderName[] = []
+  const credentials = getCredentials(config)
   if (config.github && config.github.login)
     items.push('github')
 
-  if (config.patreon && config.patreon.token)
+  if (credentials.patreon?.token)
     items.push('patreon')
 
   if (config.opencollective && (config.opencollective.id || config.opencollective.slug || config.opencollective.githubHandle))
     items.push('opencollective')
 
-  if (config.afdian && config.afdian.userId && config.afdian.token)
+  if (config.afdian && config.afdian.userId && credentials.afdian?.token)
     items.push('afdian')
 
-  if (config.polar && config.polar.token)
+  if (credentials.polar?.token)
     items.push('polar')
 
   if (config.liberapay && config.liberapay.login)
     items.push('liberapay')
 
-  if (config.githubContributors?.login && config.githubContributors?.token)
+  if (config.githubContributors?.login && credentials.githubContributors?.token)
     items.push('githubContributors')
 
-  if (config.githubContributions?.login && config.githubContributions?.token)
+  if (config.githubContributions?.login && credentials.githubContributions?.token)
     items.push('githubContributions')
 
-  if (config.gitlabContributors?.token && config.gitlabContributors?.repoId)
+  if (credentials.gitlabContributors?.token && config.gitlabContributors?.repoId)
     items.push('gitlabContributors')
 
   if (config.crowdinContributors?.token && config.crowdinContributors?.projectId)

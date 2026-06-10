@@ -1,6 +1,7 @@
 import type { ContribkitConfig, Provider, Sponsorship } from '../types'
 import { createHash } from 'node:crypto'
 import { $fetch } from 'ofetch'
+import { getCredentials } from '../configs/credentials'
 
 // afdian api docs https://afdian.net/p/9c65d9cc617011ed81c352540025c377
 
@@ -12,14 +13,13 @@ export const AfdianProvider: Provider = {
       return Promise.resolve([])
     }
 
-    return fetchAfdianSponsors(config.afdian)
+    return fetchAfdianSponsors(config.afdian, getCredentials(config).afdian?.token)
   },
 }
 
-export async function fetchAfdianSponsors(options: ContribkitConfig['afdian'] = {}): Promise<Sponsorship[]> {
+export async function fetchAfdianSponsors(options: ContribkitConfig['afdian'] = {}, token = getCredentials({}).afdian?.token): Promise<Sponsorship[]> {
   const {
     userId,
-    token,
     exchangeRate = 6.5,
     includePurchases = true,
     purchaseEffectivity = 30,

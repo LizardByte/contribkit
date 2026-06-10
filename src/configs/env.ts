@@ -1,29 +1,23 @@
 import type { ContribkitConfig, GitHubAccountType } from '../types'
 import process from 'node:process'
 import dotenv from 'dotenv'
+import { loadEnvCredentials } from './credentials'
 
-function getDeprecatedEnv(name: string, replacement: string) {
-  const value = process.env[name]
-  if (value)
-    console.warn(`[contribkit] env.${name} is deprecated, use env.${replacement} instead`)
-  return value
+export interface EnvConfig {
+  config: Partial<ContribkitConfig>
+  credentials: ReturnType<typeof loadEnvCredentials>
 }
 
-export function loadEnv(): Partial<ContribkitConfig> {
+export function loadEnv(): EnvConfig {
   dotenv.config({ quiet: true })
 
   const config: Partial<ContribkitConfig> = {
     mode: process.env.CONTRIBKIT_MODE as ContribkitConfig['mode'] | undefined,
     github: {
       login: process.env.CONTRIBKIT_GITHUB_LOGIN || process.env.GITHUB_LOGIN,
-      token: process.env.CONTRIBKIT_GITHUB_TOKEN || process.env.GITHUB_TOKEN,
       type: (process.env.CONTRIBKIT_GITHUB_TYPE || process.env.GITHUB_TYPE) as GitHubAccountType | undefined,
     },
-    patreon: {
-      token: process.env.CONTRIBKIT_PATREON_TOKEN || process.env.PATREON_TOKEN,
-    },
     opencollective: {
-      key: process.env.CONTRIBKIT_OPENCOLLECTIVE_KEY || process.env.OPENCOLLECTIVE_KEY,
       id: process.env.CONTRIBKIT_OPENCOLLECTIVE_ID || process.env.OPENCOLLECTIVE_ID,
       slug: process.env.CONTRIBKIT_OPENCOLLECTIVE_SLUG || process.env.OPENCOLLECTIVE_SLUG,
       githubHandle: process.env.CONTRIBKIT_OPENCOLLECTIVE_GH_HANDLE || process.env.OPENCOLLECTIVE_GH_HANDLE,
@@ -31,11 +25,9 @@ export function loadEnv(): Partial<ContribkitConfig> {
     },
     afdian: {
       userId: process.env.CONTRIBKIT_AFDIAN_USER_ID || process.env.AFDIAN_USER_ID,
-      token: process.env.CONTRIBKIT_AFDIAN_TOKEN || process.env.AFDIAN_TOKEN,
       exchangeRate: Number.parseFloat(process.env.CONTRIBKIT_AFDIAN_EXCHANGE_RATE || process.env.AFDIAN_EXCHANGE_RATE || '0') || undefined,
     },
     polar: {
-      token: process.env.CONTRIBKIT_POLAR_TOKEN || process.env.POLAR_TOKEN,
       organization: process.env.CONTRIBKIT_POLAR_ORGANIZATION || process.env.POLAR_ORGANIZATION,
     },
     liberapay: {
@@ -44,12 +36,10 @@ export function loadEnv(): Partial<ContribkitConfig> {
     outputDir: process.env.CONTRIBKIT_DIR,
     githubContributors: {
       login: process.env.CONTRIBKIT_GITHUB_CONTRIBUTORS_LOGIN,
-      token: process.env.CONTRIBKIT_GITHUB_CONTRIBUTORS_TOKEN,
       minContributions: Number(process.env.CONTRIBKIT_GITHUB_CONTRIBUTORS_MIN) || 1,
       repo: process.env.CONTRIBKIT_GITHUB_CONTRIBUTORS_REPO,
     },
     gitlabContributors: {
-      token: process.env.CONTRIBKIT_GITLAB_CONTRIBUTORS_TOKEN,
       minContributions: Number(process.env.CONTRIBKIT_GITLAB_CONTRIBUTORS_MIN) || 1,
       repoId: Number(process.env.CONTRIBKIT_GITLAB_CONTRIBUTORS_REPO_ID),
     },
@@ -60,12 +50,14 @@ export function loadEnv(): Partial<ContribkitConfig> {
     },
     githubContributions: {
       login: process.env.CONTRIBKIT_GITHUB_CONTRIBUTIONS_LOGIN,
-      token: process.env.CONTRIBKIT_GITHUB_CONTRIBUTIONS_TOKEN,
       maxContributions: Number(process.env.CONTRIBKIT_GITHUB_CONTRIBUTIONS_MAX) || undefined,
       logarithmicScaling: process.env.CONTRIBKIT_GITHUB_CONTRIBUTIONS_LOGARITHMIC === 'true',
     },
   }
 
   // remove undefined keys
-  return JSON.parse(JSON.stringify(config))
+  return {
+    config: JSON.parse(JSON.stringify(config)),
+    credentials: loadEnvCredentials(),
+  }
 }

@@ -1,5 +1,6 @@
 import type { ContribkitConfig, GitHubAccountType, Provider, Sponsorship, Tier } from '../types'
 import { $fetch } from 'ofetch'
+import { getCredentials } from '../configs/credentials'
 import { normalizeUrl } from '../utils'
 
 function getMonthDifference(startDate: Date, endDate: Date) {
@@ -42,15 +43,15 @@ export const GitHubProvider: Provider = {
   fetchSponsors(config) {
     if (config.mode === 'sponsees') {
       return fetchGitHubSponsoringAsSponsorships(
-        config.github?.token || config.token!,
-        config.github?.login || config.login!,
+        getCredentials(config).github?.token,
+        config.github?.login,
         config.github?.type || 'user',
       )
     }
 
     return fetchGitHubSponsors(
-      config.github?.token || config.token!,
-      config.github?.login || config.login!,
+      getCredentials(config).github?.token,
+      config.github?.login,
       config.github?.type || 'user',
       config,
     )
@@ -58,8 +59,8 @@ export const GitHubProvider: Provider = {
 }
 
 export async function fetchGitHubSponsors(
-  token: string,
-  login: string,
+  token: string | undefined,
+  login: string | undefined,
   type: GitHubAccountType,
   config: ContribkitConfig,
 ): Promise<Sponsorship[]> {
@@ -360,10 +361,15 @@ export async function fetchGitHubSponsoring(
 }
 
 export async function fetchGitHubSponsoringAsSponsorships(
-  token: string,
-  login: string,
+  token: string | undefined,
+  login: string | undefined,
   type: GitHubAccountType,
 ): Promise<Sponsorship[]> {
+  if (!token)
+    throw new Error('GitHub token is required')
+  if (!login)
+    throw new Error('GitHub login is required')
+
   // Sponsees mode always loads full history regardless of active status.
   const records = await fetchGitHubSponsoring(token, login, type, false)
   const recordsBySponsorable = groupSponsoringRecordsByLogin(records)

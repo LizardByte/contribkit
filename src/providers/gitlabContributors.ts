@@ -1,5 +1,6 @@
 import type { Provider, Sponsorship } from '../types'
 import { $fetch } from 'ofetch'
+import { getCredentials } from '../configs/credentials'
 
 interface GitLabContributor {
   name: string
@@ -22,7 +23,7 @@ export const GitlabContributorsProvider: Provider = {
       throw new Error('Gitlab repoId is required')
 
     return fetchGitlabContributors(
-      config.gitlabContributors?.token || config.token!,
+      getCredentials(config).gitlabContributors?.token,
       config.gitlabContributors.repoId,
       config.gitlabContributors?.minContributions,
     )
@@ -30,7 +31,7 @@ export const GitlabContributorsProvider: Provider = {
 }
 
 export async function fetchGitlabContributors(
-  token: string,
+  token: string | undefined,
   repoId: number,
   minContributions: number = 1,
 ): Promise<Sponsorship[]> {

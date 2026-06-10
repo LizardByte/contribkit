@@ -1,5 +1,6 @@
 import type { Provider, Sponsorship } from '../types'
 import { $fetch } from 'ofetch'
+import { getCredentials } from '../configs/credentials'
 
 export const PatreonProvider: Provider = {
   name: 'patreon',
@@ -9,11 +10,11 @@ export const PatreonProvider: Provider = {
       return Promise.resolve([])
     }
 
-    return fetchPatreonSponsors(config.patreon?.token || config.token!)
+    return fetchPatreonSponsors(getCredentials(config).patreon?.token)
   },
 }
 
-export async function fetchPatreonSponsors(token: string): Promise<Sponsorship[]> {
+export async function fetchPatreonSponsors(token: string | undefined): Promise<Sponsorship[]> {
   if (!token)
     throw new Error('Patreon token is required')
 
