@@ -69,6 +69,10 @@ CONTRIBKIT_GITLAB_CONTRIBUTORS_REPO_ID=
 ; Token requires the `read:user` and `read:org` scopes.
 CONTRIBKIT_GITHUB_TOKEN=
 CONTRIBKIT_GITHUB_LOGIN=
+; Optional data mode:
+; - sponsors: people sponsoring you (default)
+; - sponsees: people you have sponsored, including past sponsorships
+CONTRIBKIT_MODE=sponsors
 
 ; Patreon provider.
 ; Create v2 API key at https://www.patreon.com/portal/registration/register-clients
@@ -144,6 +148,11 @@ Create `contribkit.config.js` file with:
 import { defineConfig, tierPresets } from '@lizardbyte/contribkit'
 
 export default defineConfig({
+  // Data mode:
+  // - sponsors: people sponsoring you (default)
+  // - sponsees: people you have sponsored, including past sponsorships
+  mode: 'sponsors',
+
   // Providers configs
   github: {
     login: 'antfu',
@@ -243,7 +252,7 @@ export default defineConfig({
 
 <p align="center">
   <a href="https://cdn.jsdelivr.net/gh/antfu/static/sponsors.svg">
-    <img src='https://cdn.jsdelivr.net/gh/antfu/static/sponsors.svg'/>
+    <img src='https://cdn.jsdelivr.net/gh/antfu/static/sponsors.svg' alt="Sponsors"/>
   </a>
 </p>
 
@@ -258,7 +267,7 @@ export default defineConfig({
 
 <p align="center">
   <a href="https://cdn.jsdelivr.net/gh/antfu/static/sponsors.circles.svg">
-    <img src='https://cdn.jsdelivr.net/gh/antfu/static/sponsors.circles.svg'/>
+    <img src='https://cdn.jsdelivr.net/gh/antfu/static/sponsors.circles.svg' alt="Sponsors"/>
   </a>
 </p>
 

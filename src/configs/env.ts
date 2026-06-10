@@ -10,9 +10,10 @@ function getDeprecatedEnv(name: string, replacement: string) {
 }
 
 export function loadEnv(): Partial<ContribkitConfig> {
-  dotenv.config()
+  dotenv.config({ quiet: true })
 
   const config: Partial<ContribkitConfig> = {
+    mode: process.env.CONTRIBKIT_MODE as ContribkitConfig['mode'] | undefined,
     github: {
       login: process.env.CONTRIBKIT_GITHUB_LOGIN || process.env.GITHUB_LOGIN,
       token: process.env.CONTRIBKIT_GITHUB_TOKEN || process.env.GITHUB_TOKEN,

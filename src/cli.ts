@@ -3,6 +3,7 @@ import cac from 'cac'
 import { version } from '../package.json'
 import { run } from './run'
 
+const RE_FILTER = /([<>=]+)(\d+)/
 const cli = cac('contributors-svg')
   .version(version)
   .help()
@@ -36,7 +37,7 @@ cli.parse()
  * @param template
  */
 function createFilterFromString(template: string): ContribkitConfig['filter'] {
-  const [_, op, value] = template.split(/([<>=]+)/)
+  const [_, op, value] = template.split(RE_FILTER)
   const num = Number.parseInt(value)
   if (op === '<')
     return s => s.monthlyDollars < num

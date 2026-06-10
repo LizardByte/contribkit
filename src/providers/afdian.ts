@@ -7,6 +7,11 @@ import { $fetch } from 'ofetch'
 export const AfdianProvider: Provider = {
   name: 'afdian',
   fetchSponsors(config) {
+    if (config.mode === 'sponsees') {
+      console.warn('[contribkit] Afdian provider does not support `mode: "sponsees"` yet')
+      return Promise.resolve([])
+    }
+
     return fetchAfdianSponsors(config.afdian)
   },
 }
@@ -29,7 +34,7 @@ export async function fetchAfdianSponsors(options: ContribkitConfig['afdian'] = 
   let pages = 1
   do {
     const params = JSON.stringify({ page })
-    const ts = Math.round(+new Date() / 1000)
+    const ts = Math.round(Date.now() / 1000)
     const sign = md5(token, params, ts, userId)
     const sponsorshipData = await $fetch(sponsorshipApi, {
       method: 'POST',
