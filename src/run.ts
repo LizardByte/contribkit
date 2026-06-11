@@ -15,6 +15,11 @@ import { guessProviders, resolveProviders } from './providers'
 import { builtinRenderers } from './renders'
 import { outputFormats } from './types'
 
+type Logger = typeof consola
+type ResolvedConfig = Required<ContribkitConfig>
+type ResolvedMainConfig = Required<ContribkitMainConfig>
+type Replacement = ((sponsor: Sponsorship) => string) | [string, string]
+
 export {
   tiersComposer as defaultComposer,
   // default
@@ -29,170 +34,239 @@ function r(path: string) {
 }
 
 export async function run(inlineConfig?: ContribkitConfig, t = consola) {
-  t.log(`\n${c.magenta.bold`ContribKit`} ${c.dim`v${version}`}\n`)
+  t.log(formatHeader())
 
   const fullConfig = await loadConfig(inlineConfig)
-  const config = fullConfig as Required<ContribkitMainConfig>
+  const config = fullConfig as ResolvedMainConfig
   const dir = resolve(process.cwd(), config.outputDir)
-  const cacheFile = resolve(
-    dir,
-    config.mode === 'sponsees'
-      ? config.cacheFileSponsees
-      : config.cacheFile,
-  )
-
+  const cacheFile = resolveCacheFile(dir, config)
   const providers = resolveProviders(config.providers ?? guessProviders(config))
 
-  if (config.renders?.length) {
-    const names = new Set<string>()
-    config.renders.forEach((renderOptions, idx) => {
-      const name = renderOptions.name || fullConfig.name || fullConfig.mode
-      if (names.has(name))
-        throw new Error(`Duplicate render name: ${name} at index ${idx}`)
-      names.add(name)
-    })
-  }
+  validateRenderNames(config.renders, fullConfig)
 
   const linksReplacements = normalizeReplacements(config.replaceLinks)
   const avatarsReplacements = normalizeReplacements(config.replaceAvatars)
 
-  let allSponsors: Sponsorship[] = []
-  if (!fs.existsSync(cacheFile) || config.force) {
-    // Fetch sponsors
-    for (const i of providers) {
-      t.info(`Fetching sponsorships from ${i.name}...`)
-      let sponsors = await i.fetchSponsors(config)
-      sponsors.forEach(s => s.provider = i.name)
-      sponsors = (await config.onSponsorsFetched?.(sponsors, i.name)) ?? sponsors
-      t.success(`${sponsors.length} sponsorships fetched from ${i.name}`)
-      allSponsors.push(...sponsors)
-    }
+  let allSponsors = await getSponsors(
+    config,
+    providers,
+    cacheFile,
+    linksReplacements,
+    avatarsReplacements,
+    t,
+  )
 
-    // Custom hook
-    allSponsors = (await config.onSponsorsAllFetched?.(allSponsors)) ?? allSponsors
+  sortSponsors(allSponsors)
 
-    // Merge sponsors
-    {
-      const sponsorsMergeMap = new Map<Sponsorship, Set<Sponsorship>>()
+  allSponsors = (await config.onSponsorsReady?.(allSponsors)) ?? allSponsors
+  await renderSponsors(fullConfig, config, allSponsors, t)
+}
 
-      for (const rule of config.mergeSponsors || []) {
-        if (typeof rule === 'function') {
-          for (const ship of allSponsors) {
-            const result = rule(ship, allSponsors)
-            if (result)
-              pushSponsorGroup(sponsorsMergeMap, result)
-          }
-        }
-        else {
-          const group = rule.flatMap((matcher) => {
-            const matched = allSponsors.filter(s => matchSponsor(s, matcher))
-            if (!matched.length)
-              t.warn(`No sponsor matched for ${JSON.stringify(matcher)}`)
-            return matched
-          })
-          pushSponsorGroup(sponsorsMergeMap, group)
-        }
-      }
+function formatHeader() {
+  const title = c.magenta.bold('ContribKit')
+  const versionText = c.dim(`v${version}`)
+  return `\n${title} ${versionText}\n`
+}
 
-      if (config.sponsorsAutoMerge) {
-        for (const ship of allSponsors) {
-          if (!ship.sponsor.socialLogins)
-            continue
-          for (const [provider, login] of Object.entries(ship.sponsor.socialLogins)) {
-            const matched = allSponsors.filter(s => s.sponsor.login === login && s.provider === provider)
-            if (matched)
-              pushSponsorGroup(sponsorsMergeMap, [ship, ...matched])
-          }
-        }
-      }
+function resolveCacheFile(dir: string, config: ResolvedMainConfig) {
+  const filename = config.mode === 'sponsees'
+    ? config.cacheFileSponsees
+    : config.cacheFile
+  return resolve(dir, filename)
+}
 
-      const removeSponsors = new Set<Sponsorship>()
-      const groups = new Set(sponsorsMergeMap.values())
-      for (const group of groups) {
-        if (group.size === 1)
-          continue
-        const sorted = [...group]
-          .sort((a, b) => allSponsors.indexOf(a) - allSponsors.indexOf(b))
-
-        t.info(`Merging ${sorted.map(i => c.cyan`@${i.sponsor.login}(${i.provider})`).join(' + ')}`)
-
-        for (const s of sorted.slice(1))
-          removeSponsors.add(s)
-        mergeSponsors(sorted[0], sorted.slice(1))
-      }
-
-      allSponsors = allSponsors.filter(s => !removeSponsors.has(s))
-    }
-
-    // Links and avatars replacements
-    allSponsors.forEach((ship) => {
-      for (const r of linksReplacements) {
-        if (typeof r === 'function') {
-          const result = r(ship)
-          if (result) {
-            ship.sponsor.linkUrl = result
-            break
-          }
-        }
-        else if (r[0] === ship.sponsor.linkUrl) {
-          ship.sponsor.linkUrl = r[1]
-          break
-        }
-      }
-      for (const r of avatarsReplacements) {
-        if (typeof r === 'function') {
-          const result = r(ship)
-          if (result) {
-            ship.sponsor.avatarUrl = result
-            break
-          }
-        }
-        else if (r[0] === ship.sponsor.avatarUrl) {
-          ship.sponsor.avatarUrl = r[1]
-          break
-        }
-      }
-    })
-
-    t.info('Resolving avatars...')
-    await resolveAvatars(allSponsors, config.fallbackAvatar, t)
-    t.success('Avatars resolved')
-
-    await fsp.mkdir(dirname(cacheFile), { recursive: true })
-    await fsp.writeFile(cacheFile, stringifyCache(allSponsors))
+function validateRenderNames(renders: ContribkitConfig['renders'], fullConfig: ResolvedConfig) {
+  const names = new Set<string>()
+  for (const [idx, renderOptions] of (renders ?? []).entries()) {
+    const name = renderOptions.name || fullConfig.name || fullConfig.mode
+    if (names.has(name))
+      throw new Error(`Duplicate render name: ${name} at index ${idx}`)
+    names.add(name)
   }
-  else {
-    allSponsors = parseCache(await fsp.readFile(cacheFile, 'utf8'))
-    t.success(`Loaded from cache ${r(cacheFile)}`)
+}
+
+async function getSponsors(
+  config: ResolvedMainConfig,
+  providers: ReturnType<typeof resolveProviders>,
+  cacheFile: string,
+  linksReplacements: Replacement[],
+  avatarsReplacements: Replacement[],
+  t: Logger,
+) {
+  if (fs.existsSync(cacheFile) && !config.force)
+    return await loadSponsorsFromCache(cacheFile, t)
+
+  const allSponsors = await fetchFreshSponsors(config, providers, linksReplacements, avatarsReplacements, t)
+  await writeSponsorsCache(cacheFile, allSponsors)
+  return allSponsors
+}
+
+async function loadSponsorsFromCache(cacheFile: string, t: Logger) {
+  const allSponsors = parseCache(await fsp.readFile(cacheFile, 'utf8'))
+  t.success(`Loaded from cache ${r(cacheFile)}`)
+  return allSponsors
+}
+
+async function fetchFreshSponsors(
+  config: ResolvedMainConfig,
+  providers: ReturnType<typeof resolveProviders>,
+  linksReplacements: Replacement[],
+  avatarsReplacements: Replacement[],
+  t: Logger,
+) {
+  let allSponsors = await fetchProviderSponsors(config, providers, t)
+  allSponsors = (await config.onSponsorsAllFetched?.(allSponsors)) ?? allSponsors
+  allSponsors = mergeSponsorGroups(allSponsors, config, t)
+  applySponsorReplacements(allSponsors, linksReplacements, avatarsReplacements)
+
+  t.info('Resolving avatars...')
+  await resolveAvatars(allSponsors, config.fallbackAvatar, t)
+  t.success('Avatars resolved')
+
+  return allSponsors
+}
+
+async function fetchProviderSponsors(config: ResolvedMainConfig, providers: ReturnType<typeof resolveProviders>, t: Logger) {
+  const allSponsors: Sponsorship[] = []
+  for (const provider of providers) {
+    t.info(`Fetching sponsorships from ${provider.name}...`)
+    let sponsors = await provider.fetchSponsors(config)
+    sponsors.forEach(s => s.provider = provider.name)
+    sponsors = (await config.onSponsorsFetched?.(sponsors, provider.name)) ?? sponsors
+    t.success(`${sponsors.length} sponsorships fetched from ${provider.name}`)
+    allSponsors.push(...sponsors)
+  }
+  return allSponsors
+}
+
+function mergeSponsorGroups(allSponsors: Sponsorship[], config: ResolvedMainConfig, t: Logger) {
+  const sponsorsMergeMap = new Map<Sponsorship, Set<Sponsorship>>()
+  applyConfiguredMergeRules(sponsorsMergeMap, allSponsors, config, t)
+  applyAutoMerge(sponsorsMergeMap, allSponsors, config)
+  return applyMergedSponsors(sponsorsMergeMap, allSponsors, t)
+}
+
+function applyConfiguredMergeRules(
+  sponsorsMergeMap: Map<Sponsorship, Set<Sponsorship>>,
+  allSponsors: Sponsorship[],
+  config: ResolvedMainConfig,
+  t: Logger,
+) {
+  for (const rule of config.mergeSponsors || []) {
+    if (typeof rule === 'function')
+      applyCustomMergeRule(sponsorsMergeMap, allSponsors, rule)
+    else
+      applyMatcherMergeRule(sponsorsMergeMap, allSponsors, rule, t)
+  }
+}
+
+function applyCustomMergeRule(
+  sponsorsMergeMap: Map<Sponsorship, Set<Sponsorship>>,
+  allSponsors: Sponsorship[],
+  rule: (sponsor: Sponsorship, allSponsors: Sponsorship[]) => Sponsorship[] | void,
+) {
+  for (const ship of allSponsors) {
+    const result = rule(ship, allSponsors)
+    if (result)
+      pushSponsorGroup(sponsorsMergeMap, result)
+  }
+}
+
+function applyMatcherMergeRule(
+  sponsorsMergeMap: Map<Sponsorship, Set<Sponsorship>>,
+  allSponsors: Sponsorship[],
+  rule: SponsorMatcher[],
+  t: Logger,
+) {
+  const group = rule.flatMap((matcher) => {
+    const matched = allSponsors.filter(s => matchSponsor(s, matcher))
+    if (!matched.length)
+      t.warn(`No sponsor matched for ${JSON.stringify(matcher)}`)
+    return matched
+  })
+  pushSponsorGroup(sponsorsMergeMap, group)
+}
+
+function applyAutoMerge(
+  sponsorsMergeMap: Map<Sponsorship, Set<Sponsorship>>,
+  allSponsors: Sponsorship[],
+  config: ResolvedMainConfig,
+) {
+  if (!config.sponsorsAutoMerge)
+    return
+
+  for (const ship of allSponsors) {
+    for (const [provider, login] of Object.entries(ship.sponsor.socialLogins ?? {})) {
+      const matched = allSponsors.filter(s => s.sponsor.login === login && s.provider === provider)
+      pushSponsorGroup(sponsorsMergeMap, [ship, ...matched])
+    }
+  }
+}
+
+function applyMergedSponsors(sponsorsMergeMap: Map<Sponsorship, Set<Sponsorship>>, allSponsors: Sponsorship[], t: Logger) {
+  const removeSponsors = new Set<Sponsorship>()
+  const groups = new Set(sponsorsMergeMap.values())
+  for (const group of groups) {
+    if (group.size === 1)
+      continue
+    const sorted = [...group]
+      .sort((a, b) => allSponsors.indexOf(a) - allSponsors.indexOf(b))
+
+    t.info(`Merging ${formatMergedSponsors(sorted)}`)
+
+    for (const s of sorted.slice(1))
+      removeSponsors.add(s)
+    mergeSponsors(sorted[0], sorted.slice(1))
   }
 
-  // Sort
+  return allSponsors.filter(s => !removeSponsors.has(s))
+}
+
+function formatMergedSponsors(sponsors: Sponsorship[]) {
+  return sponsors.map(i => c.cyan(`@${i.sponsor.login}(${i.provider})`)).join(' + ')
+}
+
+function applySponsorReplacements(sponsors: Sponsorship[], linksReplacements: Replacement[], avatarsReplacements: Replacement[]) {
+  for (const ship of sponsors) {
+    ship.sponsor.linkUrl = findReplacement(linksReplacements, ship, ship.sponsor.linkUrl) ?? ship.sponsor.linkUrl
+    ship.sponsor.avatarUrl = findReplacement(avatarsReplacements, ship, ship.sponsor.avatarUrl) ?? ship.sponsor.avatarUrl
+  }
+}
+
+function findReplacement(replacements: Replacement[], ship: Sponsorship, current: string | undefined) {
+  for (const replacement of replacements) {
+    const result = getReplacementValue(replacement, ship, current)
+    if (result)
+      return result
+  }
+}
+
+function getReplacementValue(replacement: Replacement, ship: Sponsorship, current: string | undefined) {
+  if (typeof replacement === 'function')
+    return replacement(ship)
+  return replacement[0] === current ? replacement[1] : undefined
+}
+
+async function writeSponsorsCache(cacheFile: string, allSponsors: Sponsorship[]) {
+  await fsp.mkdir(dirname(cacheFile), { recursive: true })
+  await fsp.writeFile(cacheFile, stringifyCache(allSponsors))
+}
+
+function sortSponsors(allSponsors: Sponsorship[]) {
   allSponsors.sort((a, b) =>
     b.monthlyDollars - a.monthlyDollars // DESC amount
     || Date.parse(b.createdAt!) - Date.parse(a.createdAt!) // DESC date
     || (b.sponsor.login ?? b.sponsor.name).localeCompare(a.sponsor.login ?? a.sponsor.name), // ASC name
   )
+}
 
-  allSponsors = (await config.onSponsorsReady?.(allSponsors)) ?? allSponsors
-
-  if (config.renders?.length) {
-    t.info(`Generating with ${config.renders.length} renders...`)
-    await Promise.all(config.renders.map(async (renderOptions) => {
-      const mergedOptions = {
-        ...fullConfig,
-        ...renderOptions,
-      }
-      const renderer = builtinRenderers[mergedOptions.renderer ?? 'tiers']
-      await applyRenderer(
-        renderer,
-        config,
-        mergedOptions,
-        allSponsors,
-        t,
-      )
-    }))
-  }
-  else {
+async function renderSponsors(
+  fullConfig: ResolvedConfig,
+  config: ResolvedMainConfig,
+  allSponsors: Sponsorship[],
+  t: Logger,
+) {
+  if (!config.renders?.length) {
     const renderer = builtinRenderers[fullConfig.renderer ?? 'tiers']
     await applyRenderer(
       renderer,
@@ -201,7 +275,34 @@ export async function run(inlineConfig?: ContribkitConfig, t = consola) {
       allSponsors,
       t,
     )
+    return
   }
+
+  t.info(`Generating with ${config.renders.length} renders...`)
+  await Promise.all(config.renders.map(renderOptions =>
+    renderWithOptions(fullConfig, config, renderOptions, allSponsors, t),
+  ))
+}
+
+async function renderWithOptions(
+  fullConfig: ResolvedConfig,
+  config: ResolvedMainConfig,
+  renderOptions: ContribkitRenderOptions,
+  allSponsors: Sponsorship[],
+  t: Logger,
+) {
+  const mergedOptions = {
+    ...fullConfig,
+    ...renderOptions,
+  }
+  const renderer = builtinRenderers[mergedOptions.renderer ?? 'tiers']
+  await applyRenderer(
+    renderer,
+    config,
+    mergedOptions,
+    allSponsors,
+    t,
+  )
 }
 
 export async function applyRenderer(
@@ -315,8 +416,6 @@ function mergeSponsors(main: Sponsorship, sponsors: Sponsorship[]) {
   main.provider = [...new Set(all.map(s => s.provider))].join('+')
   return main
 }
-
-type Replacement = ((sponsor: Sponsorship) => string) | [string, string]
 
 function normalizeReplacements(replaces: ContribkitMainConfig['replaceLinks']) {
   const array = (Array.isArray(replaces) ? replaces : [replaces]).filter(notNullish)

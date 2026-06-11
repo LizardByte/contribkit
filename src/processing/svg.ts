@@ -52,12 +52,14 @@ export async function generateBadge(
   }
 
   const avatarBase64 = avatar.toString('base64')
-
-  return `<a ${url ? `href="${url}" ` : ''}class="${preset.classes || 'contribkit-link'}" target="_blank" id="${login}">
-  ${preset.name
+  const linkAttributes = url ? `href="${url}" ` : ''
+  const nameSvg = preset.name
     ? `<text x="${x + size / 2}" y="${y + size + 18}" text-anchor="middle" class="${preset.name.classes || 'contribkit-name'}" fill="${preset.name.color || 'currentColor'}">${encodeHtmlEntities(name)}</text>
   `
-    : ''}${genSvgImage(x, y, size, radius, avatarBase64, imageFormat)}
+    : ''
+
+  return `<a ${linkAttributes}class="${preset.classes || 'contribkit-link'}" target="_blank" id="${login}">
+  ${nameSvg}${genSvgImage(x, y, size, radius, avatarBase64, imageFormat)}
 </a>`.trim()
 }
 
