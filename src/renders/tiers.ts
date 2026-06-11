@@ -8,32 +8,38 @@ export async function tiersComposer(composer: SvgComposer, sponsors: Sponsorship
 
   composer.addSpan(config.padding?.top ?? 20)
 
-  for (const { tier: t, sponsors } of tierPartitions) {
-    t.composeBefore?.(composer, sponsors, config)
-    if (t.compose) {
-      t.compose(composer, sponsors, config)
-    }
-    else {
-      const preset = t.preset || tierPresets.base
-      if (sponsors.length && preset.avatar.size) {
-        const paddingTop = t.padding?.top ?? 20
-        const paddingBottom = t.padding?.bottom ?? 10
-        if (paddingTop)
-          composer.addSpan(paddingTop)
-        if (t.title) {
-          composer
-            .addTitle(t.title)
-            .addSpan(5)
-        }
-        await composer.addSponsorGrid(sponsors, preset)
-        if (paddingBottom)
-          composer.addSpan(paddingBottom)
-      }
-    }
-    t.composeAfter?.(composer, sponsors, config)
-  }
+  for (const partition of tierPartitions)
+    await composeTier(composer, partition.sponsors, partition.tier, config)
 
   composer.addSpan(config.padding?.bottom ?? 20)
+}
+
+async function composeTier(composer: SvgComposer, sponsors: Sponsorship[], tier: NonNullable<ContribkitConfig['tiers']>[number], config: ContribkitConfig) {
+  tier.composeBefore?.(composer, sponsors, config)
+  if (tier.compose)
+    tier.compose(composer, sponsors, config)
+  else
+    await composePresetTier(composer, sponsors, tier)
+  tier.composeAfter?.(composer, sponsors, config)
+}
+
+async function composePresetTier(composer: SvgComposer, sponsors: Sponsorship[], tier: NonNullable<ContribkitConfig['tiers']>[number]) {
+  const preset = tier.preset || tierPresets.base
+  if (!sponsors.length || !preset.avatar.size)
+    return
+
+  const paddingTop = tier.padding?.top ?? 20
+  const paddingBottom = tier.padding?.bottom ?? 10
+  if (paddingTop)
+    composer.addSpan(paddingTop)
+  if (tier.title) {
+    composer
+      .addTitle(tier.title)
+      .addSpan(5)
+  }
+  await composer.addSponsorGrid(sponsors, preset)
+  if (paddingBottom)
+    composer.addSpan(paddingBottom)
 }
 
 export const tiersRenderer: ContribkitRenderer = {

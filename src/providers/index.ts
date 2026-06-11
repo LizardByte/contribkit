@@ -29,35 +29,23 @@ export const ProvidersMap = {
 export function guessProviders(config: ContribkitConfig) {
   const items: ProviderName[] = []
   const credentials = getCredentials(config)
-  if (config.github?.login)
-    items.push('github')
+  const providerChecks: [ProviderName, boolean | string | number | undefined][] = [
+    ['github', config.github?.login],
+    ['patreon', credentials.patreon?.token],
+    ['opencollective', config.opencollective?.id || config.opencollective?.slug || config.opencollective?.githubHandle],
+    ['afdian', config.afdian?.userId && credentials.afdian?.token],
+    ['polar', credentials.polar?.token],
+    ['liberapay', config.liberapay?.login],
+    ['githubContributors', config.githubContributors?.login && credentials.githubContributors?.token],
+    ['githubContributions', config.githubContributions?.login && credentials.githubContributions?.token],
+    ['gitlabContributors', credentials.gitlabContributors?.token && config.gitlabContributors?.repoId],
+    ['crowdinContributors', config.crowdinContributors?.token && config.crowdinContributors?.projectId],
+  ]
 
-  if (credentials.patreon?.token)
-    items.push('patreon')
-
-  if (config.opencollective && (config.opencollective.id || config.opencollective.slug || config.opencollective.githubHandle))
-    items.push('opencollective')
-
-  if (config.afdian?.userId && credentials.afdian?.token)
-    items.push('afdian')
-
-  if (credentials.polar?.token)
-    items.push('polar')
-
-  if (config.liberapay?.login)
-    items.push('liberapay')
-
-  if (config.githubContributors?.login && credentials.githubContributors?.token)
-    items.push('githubContributors')
-
-  if (config.githubContributions?.login && credentials.githubContributions?.token)
-    items.push('githubContributions')
-
-  if (credentials.gitlabContributors?.token && config.gitlabContributors?.repoId)
-    items.push('gitlabContributors')
-
-  if (config.crowdinContributors?.token && config.crowdinContributors?.projectId)
-    items.push('crowdinContributors')
+  for (const [provider, enabled] of providerChecks) {
+    if (enabled)
+      items.push(provider)
+  }
 
   // fallback
   if (!items.length)

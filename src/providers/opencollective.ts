@@ -44,68 +44,12 @@ export async function fetchOpenCollectiveSponsors(
   includePastSponsors?: boolean,
   sponseesMode = false,
 ): Promise<Sponsorship[]> {
-  if (!key)
-    throw new Error('OpenCollective api key is required')
-  if (!slug && !id && !githubHandle)
-    throw new Error('OpenCollective collective id or slug or GitHub handle is required')
-  includePastSponsors ||= sponseesMode
-
-  const sponsors: any[] = []
-  const monthlyTransactions: any[] = []
-  let offset
-  if (!sponseesMode) {
-    offset = 0
-    do {
-      const query = makeSubscriptionsQuery(id, slug, githubHandle, offset, !includePastSponsors)
-      const data = await $fetch(API, {
-        method: 'POST',
-        body: { query },
-        headers: {
-          'Api-Key': `${key}`,
-          'Content-Type': 'application/json',
-        },
-      }) as any
-      const nodes = data.data.account.orders.nodes
-      const totalCount = data.data.account.orders.totalCount
-
-      sponsors.push(...(nodes || []))
-
-      if (nodes.length === 0)
-        offset = undefined
-      else if (totalCount > offset + nodes.length)
-        offset += nodes.length
-      else
-        offset = undefined
-    } while (offset)
-  }
-
-  offset = 0
-  do {
-    const now: Date = new Date()
-    const dateFrom: Date | undefined = includePastSponsors
-      ? undefined
-      : new Date(now.getFullYear(), now.getMonth(), 1)
-    const query = makeTransactionsQuery(id, slug, githubHandle, offset, dateFrom, undefined, sponseesMode)
-    const data = await $fetch(API, {
-      method: 'POST',
-      body: { query },
-      headers: {
-        'Api-Key': `${key}`,
-        'Content-Type': 'application/json',
-      },
-    }) as any
-    const nodes = data.data.account.transactions.nodes
-    const totalCount = data.data.account.transactions.totalCount
-
-    monthlyTransactions.push(...(nodes || []))
-    if (nodes.length === 0)
-      offset = undefined
-    else if (totalCount > offset + nodes.length)
-      offset += nodes.length
-    else
-      offset = undefined
-  } while (offset)
-
+  const apiKey = requireOpenCollectiveOptions(key, id, slug, githubHandle)
+  const includePast = includePastSponsors || sponseesMode
+  const sponsors = sponseesMode
+    ? []
+    : await fetchOpenCollectiveOrders(apiKey, id, slug, githubHandle, includePast)
+  const monthlyTransactions = await fetchOpenCollectiveTransactions(apiKey, id, slug, githubHandle, includePast, sponseesMode)
   const sponsorships: [string, Sponsorship][] = sponsors
     .map(createSponsorFromOrder)
     .filter((sponsorship): sponsorship is [string, Sponsorship] => sponsorship !== null)
@@ -114,57 +58,151 @@ export async function fetchOpenCollectiveSponsors(
     .map(t => createSponsorFromTransaction(t, sponsorships.map(i => i[1].raw.id), sponseesMode))
     .filter((sponsorship): sponsorship is [string, Sponsorship] => sponsorship !== null && sponsorship !== undefined)
 
-  if (sponseesMode) {
-    const processed: Map<string, Sponsorship> = sponsorships
-      .concat(monthlySponsorships)
-      .reduce((map, [id, sponsor]) => {
-        const existingSponsor = map.get(id)
-        if (existingSponsor) {
-          existingSponsor.monthlyDollars += sponsor.monthlyDollars
-          existingSponsor.isOneTime = Boolean(existingSponsor.isOneTime && sponsor.isOneTime)
-          if (sponsor.createdAt && (!existingSponsor.createdAt || sponsor.createdAt.localeCompare(existingSponsor.createdAt) < 0))
-            existingSponsor.createdAt = sponsor.createdAt
-        }
-        else {
-          map.set(id, sponsor)
-        }
-        return map
-      }, new Map())
+  return sponseesMode
+    ? mergeSponseeSponsorships(sponsorships.concat(monthlySponsorships))
+    : mergeSponsorSponsorships(sponsorships, monthlySponsorships)
+}
 
-    return Array.from(processed.values())
+function requireOpenCollectiveOptions(key?: string, id?: string, slug?: string, githubHandle?: string) {
+  if (!key)
+    throw new Error('OpenCollective api key is required')
+  if (!slug && !id && !githubHandle)
+    throw new Error('OpenCollective collective id or slug or GitHub handle is required')
+  return key
+}
+
+async function fetchOpenCollectiveOrders(
+  key: string,
+  id: string | undefined,
+  slug: string | undefined,
+  githubHandle: string | undefined,
+  includePastSponsors: boolean,
+) {
+  return await fetchOpenCollectivePages(
+    key,
+    offset => makeSubscriptionsQuery(id, slug, githubHandle, offset, !includePastSponsors),
+    data => data.data.account.orders,
+  )
+}
+
+async function fetchOpenCollectiveTransactions(
+  key: string,
+  id: string | undefined,
+  slug: string | undefined,
+  githubHandle: string | undefined,
+  includePastSponsors: boolean,
+  sponseesMode: boolean,
+) {
+  const dateFrom = getTransactionsStartDate(includePastSponsors)
+  return await fetchOpenCollectivePages(
+    key,
+    offset => makeTransactionsQuery(id, slug, githubHandle, offset, dateFrom, undefined, sponseesMode),
+    data => data.data.account.transactions,
+  )
+}
+
+function getTransactionsStartDate(includePastSponsors: boolean) {
+  const now = new Date()
+  return includePastSponsors
+    ? undefined
+    : new Date(now.getFullYear(), now.getMonth(), 1)
+}
+
+async function fetchOpenCollectivePages(
+  key: string,
+  makeQuery: (offset: number) => string,
+  getConnection: (data: any) => { nodes?: any[], totalCount: number },
+) {
+  const nodes: any[] = []
+  let offset: number | undefined = 0
+  while (offset !== undefined) {
+    const data = await fetchOpenCollectivePage(key, makeQuery(offset))
+    const connection = getConnection(data)
+    const pageNodes = connection.nodes ?? []
+    nodes.push(...pageNodes)
+    offset = getNextOffset(offset, pageNodes.length, connection.totalCount)
+  }
+  return nodes
+}
+
+async function fetchOpenCollectivePage(key: string, query: string) {
+  return await $fetch(API, {
+    method: 'POST',
+    body: { query },
+    headers: {
+      'Api-Key': `${key}`,
+      'Content-Type': 'application/json',
+    },
+  }) as any
+}
+
+function getNextOffset(offset: number, nodeCount: number, totalCount: number) {
+  if (nodeCount === 0)
+    return undefined
+  return totalCount > offset + nodeCount ? offset + nodeCount : undefined
+}
+
+function mergeSponseeSponsorships(sponsorships: [string, Sponsorship][]) {
+  const processed = new Map<string, Sponsorship>()
+  for (const [id, sponsor] of sponsorships)
+    mergeSponseeSponsor(processed, id, sponsor)
+  return Array.from(processed.values())
+}
+
+function mergeSponseeSponsor(processed: Map<string, Sponsorship>, id: string, sponsor: Sponsorship) {
+  const existingSponsor = processed.get(id)
+  if (!existingSponsor) {
+    processed.set(id, sponsor)
+    return
   }
 
-  const transactionsBySponsorId: Map<string, Sponsorship> = monthlySponsorships.reduce((map, [id, sponsor]) => {
-    const existingSponsor = map.get(id)
-    if (existingSponsor) {
-      const createdAt = toDate(sponsor.createdAt)
-      const existingSponsorCreatedAt = toDate(existingSponsor.createdAt)
-      if (createdAt >= existingSponsorCreatedAt)
-        map.set(id, sponsor)
+  existingSponsor.monthlyDollars += sponsor.monthlyDollars
+  existingSponsor.isOneTime = Boolean(existingSponsor.isOneTime && sponsor.isOneTime)
+  if (isEarlierSponsor(sponsor, existingSponsor))
+    existingSponsor.createdAt = sponsor.createdAt
+}
 
-      else if (isSameMonth(existingSponsorCreatedAt, createdAt))
-        existingSponsor.monthlyDollars += sponsor.monthlyDollars
-    }
-    else { map.set(id, sponsor) }
+function isEarlierSponsor(sponsor: Sponsorship, existingSponsor: Sponsorship) {
+  return !!sponsor.createdAt && (!existingSponsor.createdAt || sponsor.createdAt.localeCompare(existingSponsor.createdAt) < 0)
+}
 
-    return map
-  }, new Map())
+function mergeSponsorSponsorships(sponsorships: [string, Sponsorship][], monthlySponsorships: [string, Sponsorship][]) {
+  const processed = keepLatestSponsorships(sponsorships)
+  const transactionsBySponsorId = keepLatestSponsorships(monthlySponsorships, mergeSameMonthSponsorship)
+  return Array.from(processed.values()).concat(Array.from(transactionsBySponsorId.values()))
+}
 
-  const processed: Map<string, Sponsorship> = sponsorships
-    .reduce((map, [id, sponsor]) => {
-      const existingSponsor = map.get(id)
-      if (existingSponsor) {
-        const createdAt = toDate(sponsor.createdAt)
-        const existingSponsorCreatedAt = toDate(existingSponsor.createdAt)
-        if (createdAt >= existingSponsorCreatedAt)
-          map.set(id, sponsor)
-      }
-      else { map.set(id, sponsor) }
-      return map
-    }, new Map())
+function keepLatestSponsorships(
+  sponsorships: [string, Sponsorship][],
+  mergeOlder?: (existingSponsor: Sponsorship, sponsor: Sponsorship) => void,
+) {
+  const processed = new Map<string, Sponsorship>()
+  for (const [id, sponsor] of sponsorships)
+    keepLatestSponsorship(processed, id, sponsor, mergeOlder)
+  return processed
+}
 
-  const result: Sponsorship[] = Array.from(processed.values()).concat(Array.from(transactionsBySponsorId.values()))
-  return result
+function keepLatestSponsorship(
+  processed: Map<string, Sponsorship>,
+  id: string,
+  sponsor: Sponsorship,
+  mergeOlder?: (existingSponsor: Sponsorship, sponsor: Sponsorship) => void,
+) {
+  const existingSponsor = processed.get(id)
+  if (!existingSponsor) {
+    processed.set(id, sponsor)
+    return
+  }
+
+  if (toDate(sponsor.createdAt) >= toDate(existingSponsor.createdAt))
+    processed.set(id, sponsor)
+  else
+    mergeOlder?.(existingSponsor, sponsor)
+}
+
+function mergeSameMonthSponsorship(existingSponsor: Sponsorship, sponsor: Sponsorship) {
+  if (isSameMonth(toDate(existingSponsor.createdAt), toDate(sponsor.createdAt)))
+    existingSponsor.monthlyDollars += sponsor.monthlyDollars
 }
 
 function createSponsorFromOrder(order: any): [string, Sponsorship] | undefined {
@@ -218,22 +256,6 @@ function createSponsorFromTransaction(transaction: any, excludeOrders: string[],
   if (excludeOrders.includes(transaction.order?.id))
     return undefined
 
-  let monthlyDollars: number = transaction.amount.value
-  if (sponseesMode) {
-    monthlyDollars = Math.abs(transaction.amount.value)
-  }
-  else if (transaction.order?.status !== 'ACTIVE') {
-    const firstDayOfCurrentMonth = new Date(new Date().getUTCFullYear(), new Date().getUTCMonth(), 1)
-    if (new Date(transaction.createdAt) < firstDayOfCurrentMonth)
-      monthlyDollars = -1
-  }
-  else if (transaction.order?.frequency === 'MONTHLY') {
-    monthlyDollars = transaction.order?.amount.value
-  }
-  else if (transaction.order?.frequency === 'YEARLY') {
-    monthlyDollars = transaction.order?.amount.value / 12
-  }
-
   const sponsor: Sponsorship = {
     sponsor: {
       name: account.name,
@@ -245,18 +267,45 @@ function createSponsorFromTransaction(transaction: any, excludeOrders: string[],
       socialLogins: getSocialLogins(slug, account.socialLinks),
     },
     isOneTime: transaction.order?.frequency === 'ONETIME',
-    monthlyDollars,
-    privacyLevel: sponseesMode ? 'PUBLIC' : (account.isIncognito ? 'PRIVATE' : 'PUBLIC'),
+    monthlyDollars: getTransactionMonthlyDollars(transaction, sponseesMode),
+    privacyLevel: getTransactionPrivacyLevel(account, sponseesMode),
     tierName: transaction.order?.tier?.name ?? transaction.tier?.name,
-    createdAt: sponseesMode
-      ? transaction.createdAt
-      : transaction.order?.frequency === 'ONETIME'
-        ? transaction.createdAt
-        : transaction.order?.createdAt,
+    createdAt: getTransactionCreatedAt(transaction, sponseesMode),
     raw: transaction,
   }
 
   return [account.id || slug, sponsor]
+}
+
+function getTransactionMonthlyDollars(transaction: any, sponseesMode: boolean) {
+  if (sponseesMode)
+    return Math.abs(transaction.amount.value)
+  if (transaction.order?.status !== 'ACTIVE')
+    return getInactiveTransactionMonthlyDollars(transaction)
+  if (transaction.order?.frequency === 'MONTHLY')
+    return transaction.order?.amount.value
+  if (transaction.order?.frequency === 'YEARLY')
+    return transaction.order?.amount.value / 12
+  return transaction.amount.value
+}
+
+function getInactiveTransactionMonthlyDollars(transaction: any) {
+  const firstDayOfCurrentMonth = new Date(new Date().getUTCFullYear(), new Date().getUTCMonth(), 1)
+  return new Date(transaction.createdAt) < firstDayOfCurrentMonth
+    ? -1
+    : transaction.amount.value
+}
+
+function getTransactionPrivacyLevel(account: any, sponseesMode: boolean): 'PUBLIC' | 'PRIVATE' {
+  if (sponseesMode)
+    return 'PUBLIC'
+  return account.isIncognito ? 'PRIVATE' : 'PUBLIC'
+}
+
+function getTransactionCreatedAt(transaction: any, sponseesMode: boolean) {
+  if (sponseesMode || transaction.order?.frequency === 'ONETIME')
+    return transaction.createdAt
+  return transaction.order?.createdAt
 }
 
 /**
