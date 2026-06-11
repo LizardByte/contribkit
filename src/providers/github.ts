@@ -77,21 +77,7 @@ export async function fetchGitHubSponsors(
   const tiers = config.tiers?.filter(tier => tier.monthlyDollars && tier.monthlyDollars > 0).sort((a, b) => b.monthlyDollars! - a.monthlyDollars!)
   do {
     const query = makeQuery(login, type, !config.includePastSponsors, cursor)
-    const data = await $fetch(API, {
-      method: 'POST',
-      body: { query },
-      headers: {
-        'Authorization': `bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    }) as any
-
-    if (!data)
-      throw new Error(`Get no response on requesting ${API}`)
-    else if (data.errors?.[0]?.type === 'INSUFFICIENT_SCOPES')
-      throw new Error('Token is missing the `read:user` and/or `read:org` scopes')
-    else if (data.errors?.length)
-      throw new Error(`GitHub API error:\n${JSON.stringify(data.errors, null, 2)}`)
+    const data = await requestGitHubGraphQL(token, query)
 
     sponsors.push(
       ...(data.data[type].sponsorshipsAsMaintainer.nodes || []),
@@ -224,7 +210,7 @@ function assertGitHubSponsoringParams(
     throw new Error('GitHub type must be either `user` or `organization`')
 }
 
-async function requestGitHubSponsoringGraphQL(token: string, query: string): Promise<any> {
+async function requestGitHubGraphQL(token: string, query: string): Promise<any> {
   const data = await $fetch(API, {
     method: 'POST',
     body: { query },
@@ -255,7 +241,7 @@ async function fetchGitHubSponsoringNodes(
 
   do {
     const query = makeSponsoringQuery(login, type, activeOnly, cursor)
-    const data = await requestGitHubSponsoringGraphQL(token, query)
+    const data = await requestGitHubGraphQL(token, query)
     const page = data.data?.[type]?.sponsorshipsAsSponsor
     if (!page)
       throw new Error('Invalid GitHub response: `sponsorshipsAsSponsor` is missing')
@@ -419,7 +405,7 @@ export async function fetchGitHubTotalSponsorshipAmountAsSponsor(
   assertGitHubSponsoringParams(token, login, type)
 
   const query = makeSponsoringTotalAmountQuery(login, type, options)
-  const data = await requestGitHubSponsoringGraphQL(token, query)
+  const data = await requestGitHubGraphQL(token, query)
 
   const totalInCents = data.data?.[type]?.totalSponsorshipAmountAsSponsorInCents
   if (typeof totalInCents !== 'number')
