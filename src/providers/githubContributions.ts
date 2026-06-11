@@ -1,5 +1,6 @@
 import type { Provider, Sponsorship } from '../types'
 import { $fetch } from 'ofetch'
+import { getCredentials } from '../configs/credentials'
 
 export const GitHubContributionsProvider: Provider = {
   name: 'githubContributions',
@@ -8,7 +9,7 @@ export const GitHubContributionsProvider: Provider = {
       throw new Error('GitHub login is required for githubContributions provider')
 
     return fetchGitHubContributions(
-      config.githubContributions?.token || config.token!,
+      getCredentials(config).githubContributions?.token,
       config.githubContributions.login,
       config.githubContributions.maxContributions,
       config.githubContributions.logarithmicScaling,
@@ -304,7 +305,7 @@ function convertToSponsorships(
 }
 
 export async function fetchGitHubContributions(
-  token: string,
+  token: string | undefined,
   login: string,
   maxContributions?: number,
   logarithmicScaling?: boolean,

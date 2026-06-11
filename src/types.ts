@@ -89,14 +89,6 @@ export interface ProvidersConfig {
      */
     login?: string
     /**
-     * GitHub Token that have access to your sponsorships.
-     *
-     * Will read from `CONTRIBKIT_GITHUB_TOKEN` environment variable if not set.
-     *
-     * @deprecated It's not recommended set this value directly, pass from env or use `.env` file.
-     */
-    token?: string
-    /**
      * The account type for sponsorships.
      *
      * Possible values are `user`(default) and `organization`.
@@ -104,25 +96,8 @@ export interface ProvidersConfig {
      */
     type?: GitHubAccountType
   }
-  patreon?: {
-    /**
-     * Patreon Token that have access to your sponsorships.
-     *
-     * Will read from `CONTRIBKIT_PATREON_TOKEN` environment variable if not set.
-     *
-     * @deprecated It's not recommended set this value directly, pass from env or use `.env` file.
-     */
-    token?: string
-  }
+  patreon?: Record<string, never>
   opencollective?: {
-    /**
-     * Api key of your OpenCollective account.
-     *
-     * Will read from `CONTRIBKIT_OPENCOLLECTIVE_KEY` environment variable if not set.
-     *
-     * @deprecated It's not recommended set this value directly, pass from env or use `.env` file.
-     */
-    key?: string
     /**
      * The id of your account.
      *
@@ -158,15 +133,6 @@ export interface ProvidersConfig {
      */
     userId?: string
     /**
-     * Afdian Token that have access to your sponsorships.
-     *
-     * Will read from `CONTRIBKIT_AFDIAN_TOKEN` environment variable if not set.
-     *
-     * @see https://afdian.net/dashboard/dev
-     * @deprecated It's not recommended set this value directly, pass from env or use `.env` file.
-     */
-    token?: string
-    /**
      * Exchange rate of USD to CNY
      *
      * @default 6.5
@@ -185,15 +151,6 @@ export interface ProvidersConfig {
   }
 
   polar?: {
-    /**
-     * Polar token that have access to your sponsorships.
-     *
-     * Will read from `CONTRIBKIT_POLAR_TOKEN` environment variable if not set.
-     *
-     * @see https://polar.sh/settings
-     * @deprecated It's not recommended set this value directly, pass from env or use `.env` file.
-     */
-    token?: string
     /**
      * The name of the organization to fetch sponsorships from. If not set, it will fetch the sponsorships of the user.
      *
@@ -219,14 +176,6 @@ export interface ProvidersConfig {
      */
     login?: string
     /**
-     * GitHub Token that have access to your sponsorships.
-     *
-     * Will read from `CONTRIBKIT_GITHUB_CONTRIBUTORS_TOKEN` environment variable if not set.
-     *
-     * @deprecated It's not recommended set this value directly, pass from env or use `.env` file.
-     */
-    token?: string
-    /**
      * The minimum number of contributions to be considered a sponsor.
      *
      * @default 1
@@ -241,14 +190,6 @@ export interface ProvidersConfig {
   }
 
   gitlabContributors?: {
-    /**
-     * Gitlab Token that have access contributors.
-     *
-     * Will read from `CONTRIBKIT_GITLAB_CONTRIBUTORS_TOKEN` environment variable if not set.
-     *
-     * @deprecated It's not recommended set this value directly, pass from env or use `.env` file.
-     */
-    token?: string
     /**
      * The minimum number of contributions to be considered a sponsor.
      *
@@ -291,14 +232,6 @@ export interface ProvidersConfig {
      * Will read from `CONTRIBKIT_GITHUB_CONTRIBUTIONS_LOGIN` environment variable if not set.
      */
     login?: string
-    /**
-     * GitHub Token that has access to read user contributions.
-     *
-     * Will read from `CONTRIBKIT_GITHUB_CONTRIBUTIONS_TOKEN` environment variable if not set.
-     *
-     * @deprecated It's not recommended set this value directly, pass from env or use `.env` file.
-     */
-    token?: string
     /**
      * Cap the maximum contribution count per organization/user.
      * Useful to prevent one dominant contributor from overshadowing others in visualizations.
@@ -424,16 +357,6 @@ export interface ContribkitConfig extends ProvidersConfig, ContribkitRenderOptio
    * @default 'sponsors'
    */
   mode?: SponsorshipMode
-
-  /**
-   * @deprecated use `github.login` instead
-   */
-  login?: string
-
-  /**
-   * @deprecated use `github.token` instead
-   */
-  token?: string
 
   /**
    * @default auto detect based on the config provided

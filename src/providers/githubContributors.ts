@@ -1,5 +1,6 @@
 import type { Provider, Sponsorship } from '../types'
 import { $fetch } from 'ofetch'
+import { getCredentials } from '../configs/credentials'
 
 export const GitHubContributorsProvider: Provider = {
   name: 'githubContributors',
@@ -8,8 +9,8 @@ export const GitHubContributorsProvider: Provider = {
       throw new Error('GitHub repository is required')
 
     return fetchGitHubContributors(
-      config.githubContributors?.token || config.token!,
-      config.githubContributors?.login || config.login!,
+      getCredentials(config).githubContributors?.token,
+      config.githubContributors.login,
       config.githubContributors.repo,
       config.githubContributors?.minContributions,
     )
@@ -17,8 +18,8 @@ export const GitHubContributorsProvider: Provider = {
 }
 
 export async function fetchGitHubContributors(
-  token: string,
-  login: string,
+  token: string | undefined,
+  login: string | undefined,
   repo: string,
   minContributions = 1,
 ): Promise<Sponsorship[]> {

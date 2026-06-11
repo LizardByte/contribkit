@@ -225,12 +225,13 @@ import { fetchSponsors } from '@lizardbyte/contribkit'
 
 const sponsors = await fetchSponsors({
   github: {
-    token,
     login,
   },
   // ...
 })
 ```
+
+Set credentials with environment variables such as `CONTRIBKIT_GITHUB_TOKEN`.
 
 Check the type definition or source code for more utils available.
 

@@ -14,7 +14,7 @@ export const CrowdinContributorsProvider: Provider = {
   name: 'crowdinContributors',
   fetchSponsors(config) {
     return fetchCrowdinContributors(
-      config.crowdinContributors?.token || config.token!,
+      config.crowdinContributors?.token,
       config.crowdinContributors?.projectId || 0,
       config.crowdinContributors?.minTranslations || 1,
     )
@@ -22,7 +22,7 @@ export const CrowdinContributorsProvider: Provider = {
 }
 
 export async function fetchCrowdinContributors(
-  token: string,
+  token: string | undefined,
   projectId: number,
   minTranslations = 1,
 ): Promise<Sponsorship[]> {

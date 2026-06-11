@@ -1,5 +1,6 @@
 import type { Provider, Sponsorship } from '../types'
 import { ofetch } from 'ofetch'
+import { getCredentials } from '../configs/credentials'
 
 export const PolarProvider: Provider = {
   name: 'polar',
@@ -9,11 +10,11 @@ export const PolarProvider: Provider = {
       return Promise.resolve([])
     }
 
-    return fetchPolarSponsors(config.polar?.token || config.token!, config.polar?.organization)
+    return fetchPolarSponsors(getCredentials(config).polar?.token, config.polar?.organization)
   },
 }
 
-export async function fetchPolarSponsors(token: string, organization?: string): Promise<Sponsorship[]> {
+export async function fetchPolarSponsors(token: string | undefined, organization?: string): Promise<Sponsorship[]> {
   if (!token)
     throw new Error('Polar token is required')
   if (!organization)
