@@ -51,7 +51,7 @@ export async function resolveAvatars(
     if (pngBuffer) {
       // Store the highest resolution version we use of the original image
       // Stored in webp to save space
-      ship.sponsor.avatarBuffer = await resizeImage(pngBuffer, 120, 'webp')
+      ship.sponsor.avatarBuffer = await resizeImage(pngBuffer, 'webp', 120)
     }
   })))
 }
@@ -59,8 +59,8 @@ export async function resolveAvatars(
 const cache = new Map<Buffer, Map<string, Buffer>>()
 export async function resizeImage(
   image: Buffer,
-  size = 100,
   format: ImageFormat,
+  size = 100,
 ) {
   const cacheKey = `${size}:${format}`
   if (cache.has(image)) {

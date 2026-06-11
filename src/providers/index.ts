@@ -29,7 +29,7 @@ export const ProvidersMap = {
 export function guessProviders(config: ContribkitConfig) {
   const items: ProviderName[] = []
   const credentials = getCredentials(config)
-  if (config.github && config.github.login)
+  if (config.github?.login)
     items.push('github')
 
   if (credentials.patreon?.token)
@@ -44,7 +44,7 @@ export function guessProviders(config: ContribkitConfig) {
   if (credentials.polar?.token)
     items.push('polar')
 
-  if (config.liberapay && config.liberapay.login)
+  if (config.liberapay?.login)
     items.push('liberapay')
 
   if (config.githubContributors?.login && credentials.githubContributors?.token)

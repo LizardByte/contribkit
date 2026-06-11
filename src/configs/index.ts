@@ -69,13 +69,13 @@ export async function loadConfig(inlineConfig: ContribkitConfig = {}): Promise<R
   if (!['sponsors', 'sponsees'].includes(resolved.mode))
     throw new Error(`Invalid mode: ${resolved.mode}. Expected "sponsors" or "sponsees".`)
 
-  resolved.name = inlineConfig.name || config.name || envConfig.name || resolved.mode
+  resolved.name = inlineConfig.name ?? config.name ?? envConfig.name ?? resolved.mode
 
   return resolved
 }
 
 export function partitionTiers(sponsors: Sponsorship[], tiers: Tier[], includePastSponsors?: boolean): TierPartition[] {
-  const tierMappings = tiers!.map<TierPartition>(tier => ({
+  const tierMappings = tiers.map<TierPartition>(tier => ({
     monthlyDollars: tier.monthlyDollars ?? 0,
     tier,
     sponsors: [],
@@ -88,8 +88,9 @@ export function partitionTiers(sponsors: Sponsorship[], tiers: Tier[], includePa
   if (finalSponsors.length !== 1)
     throw new Error(`There should be exactly one tier with no \`monthlyDollars\`, but got ${finalSponsors.length}`)
 
+  sponsors.sort((a, b) => Date.parse(a.createdAt!) - Date.parse(b.createdAt!))
+
   sponsors
-    .sort((a, b) => Date.parse(a.createdAt!) - Date.parse(b.createdAt!))
     .filter(s => s.monthlyDollars > 0 || includePastSponsors) // Past sponsors monthlyDollars is -1
     .forEach((sponsor) => {
       const tier = tierMappings.find(t => sponsor.monthlyDollars >= t.monthlyDollars) ?? tierMappings[0]

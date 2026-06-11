@@ -1,6 +1,11 @@
 import type { ContribkitRenderer, Sponsorship } from '../types'
 import { generateBadge, SvgComposer } from '../processing/svg'
 
+interface SponsorHierarchy extends Sponsorship {
+  children?: Sponsorship[]
+  id?: string
+}
+
 export const circlesRenderer: ContribkitRenderer = {
   name: 'contribkit:circles',
   async renderSVG(config, sponsors) {
@@ -18,20 +23,21 @@ export const circlesRenderer: ContribkitRenderer = {
     function defaultInterop(sponsor: Sponsorship) {
       return sponsor.monthlyDollars < 0
         ? radiusPast
-        : lerp(radiusMin, radiusMax, (Math.max(0.1, sponsor.monthlyDollars || 0) / amountMax) ** 0.9)
+        : lerp(radiusMin, radiusMax, (Math.max(0.1, sponsor.monthlyDollars ?? 0) / amountMax) ** 0.9)
     }
 
     if (!config.includePastSponsors)
       sponsors = sponsors.filter(sponsor => sponsor.monthlyDollars > 0)
 
-    const root = hierarchy({ ...sponsors[0], children: sponsors, id: 'root' })
+    const rootData: SponsorHierarchy = { ...sponsors[0], children: sponsors, id: 'root' }
+    const root = hierarchy(rootData)
       .sum(d => weightInterop(d, amountMax))
-      .sort((a, b) => (b.value || 0) - (a.value || 0))
+      .sort((a, b) => (b.value ?? 0) - (a.value ?? 0))
 
-    const p = pack<typeof sponsors[0]>()
+    const p = pack<SponsorHierarchy>()
     p.size([config.width, config.width])
     p.padding(config.width / 400)
-    const circles = p(root as any).descendants().slice(1)
+    const circles = p(root).descendants().slice(1)
 
     for (const circle of circles) {
       composer.addRaw(await generateBadge(
