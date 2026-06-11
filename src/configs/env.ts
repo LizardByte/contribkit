@@ -1,7 +1,7 @@
 import type { ContribkitConfig, GitHubAccountType } from '../types'
 import process from 'node:process'
 import dotenv from 'dotenv'
-import { loadEnvCredentials } from './credentials'
+import { loadEnvCredentials, pruneUndefined } from './credentials'
 
 export interface EnvConfig {
   config: Partial<ContribkitConfig>
@@ -57,7 +57,7 @@ export function loadEnv(): EnvConfig {
 
   // remove undefined keys
   return {
-    config: JSON.parse(JSON.stringify(config)),
+    config: pruneUndefined(config),
     credentials: loadEnvCredentials(),
   }
 }

@@ -33,10 +33,24 @@ interface ConfigWithCredentials extends ContribkitConfig {
   credentials?: EnvCredentials
 }
 
+export function pruneUndefined<T>(value: T): T {
+  if (Array.isArray(value))
+    return value.map(item => pruneUndefined(item)) as T
+
+  if (!value || typeof value !== 'object')
+    return value
+
+  return Object.fromEntries(
+    Object.entries(value)
+      .filter(([, item]) => item !== undefined)
+      .map(([key, item]) => [key, pruneUndefined(item)]),
+  ) as T
+}
+
 export function loadEnvCredentials(): EnvCredentials {
   dotenv.config({ quiet: true })
 
-  return JSON.parse(JSON.stringify({
+  return pruneUndefined({
     github: {
       token: process.env.CONTRIBKIT_GITHUB_TOKEN || process.env.GITHUB_TOKEN,
     },
@@ -61,7 +75,7 @@ export function loadEnvCredentials(): EnvCredentials {
     githubContributions: {
       token: process.env.CONTRIBKIT_GITHUB_CONTRIBUTIONS_TOKEN,
     },
-  }))
+  })
 }
 
 export function getCredentials(config: ContribkitConfig): EnvCredentials {

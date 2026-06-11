@@ -38,7 +38,7 @@ export function guessProviders(config: ContribkitConfig) {
   if (config.opencollective && (config.opencollective.id || config.opencollective.slug || config.opencollective.githubHandle))
     items.push('opencollective')
 
-  if (config.afdian && config.afdian.userId && credentials.afdian?.token)
+  if (config.afdian?.userId && credentials.afdian?.token)
     items.push('afdian')
 
   if (credentials.polar?.token)
