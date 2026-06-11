@@ -61,7 +61,7 @@ export async function fetchGitlabContributors(
       },
     )
 
-    if (!response || !response.length)
+    if (!response?.length)
       break
 
     allContributors.push(...response)

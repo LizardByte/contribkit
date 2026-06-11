@@ -5,7 +5,7 @@ export function stringifyCache(cache: Sponsorship[]): string {
   return JSON.stringify(
     cache,
     (_key, value) => {
-      if (value && value.type === 'Buffer' && Array.isArray(value.data)) {
+      if (value?.type === 'Buffer' && Array.isArray(value.data)) {
         return Buffer.from(value.data).toString('base64')
       }
       return value

@@ -41,7 +41,7 @@ export async function run(inlineConfig?: ContribkitConfig, t = consola) {
       : config.cacheFile,
   )
 
-  const providers = resolveProviders(config.providers || guessProviders(config))
+  const providers = resolveProviders(config.providers ?? guessProviders(config))
 
   if (config.renders?.length) {
     const names = new Set<string>()
@@ -63,60 +63,24 @@ export async function run(inlineConfig?: ContribkitConfig, t = consola) {
       t.info(`Fetching sponsorships from ${i.name}...`)
       let sponsors = await i.fetchSponsors(config)
       sponsors.forEach(s => s.provider = i.name)
-      sponsors = await config.onSponsorsFetched?.(sponsors, i.name) || sponsors
+      sponsors = (await config.onSponsorsFetched?.(sponsors, i.name)) ?? sponsors
       t.success(`${sponsors.length} sponsorships fetched from ${i.name}`)
       allSponsors.push(...sponsors)
     }
 
     // Custom hook
-    allSponsors = await config.onSponsorsAllFetched?.(allSponsors) || allSponsors
+    allSponsors = (await config.onSponsorsAllFetched?.(allSponsors)) ?? allSponsors
 
     // Merge sponsors
     {
       const sponsorsMergeMap = new Map<Sponsorship, Set<Sponsorship>>()
-
-      function pushGroup(group: Sponsorship[]) {
-        const existingSets = new Set(group.map(s => sponsorsMergeMap.get(s)).filter(notNullish))
-        let set: Set<Sponsorship>
-        if (existingSets.size === 1) {
-          set = [...existingSets.values()][0]
-        }
-        else if (existingSets.size === 0) {
-          set = new Set(group)
-        }
-        // Multiple sets, merge them into one
-        else {
-          set = new Set()
-          for (const s of existingSets) {
-            for (const i of s)
-              set.add(i)
-          }
-        }
-
-        for (const s of group) {
-          set.add(s)
-          sponsorsMergeMap.set(s, set)
-        }
-      }
-
-      function matchSponsor(sponsor: Sponsorship, matcher: SponsorMatcher) {
-        if (matcher.provider && sponsor.provider !== matcher.provider)
-          return false
-        if (matcher.login && sponsor.sponsor.login !== matcher.login)
-          return false
-        if (matcher.name && sponsor.sponsor.name !== matcher.name)
-          return false
-        if (matcher.type && sponsor.sponsor.type !== matcher.type)
-          return false
-        return true
-      }
 
       for (const rule of config.mergeSponsors || []) {
         if (typeof rule === 'function') {
           for (const ship of allSponsors) {
             const result = rule(ship, allSponsors)
             if (result)
-              pushGroup(result)
+              pushSponsorGroup(sponsorsMergeMap, result)
           }
         }
         else {
@@ -126,7 +90,7 @@ export async function run(inlineConfig?: ContribkitConfig, t = consola) {
               t.warn(`No sponsor matched for ${JSON.stringify(matcher)}`)
             return matched
           })
-          pushGroup(group)
+          pushSponsorGroup(sponsorsMergeMap, group)
         }
       }
 
@@ -137,21 +101,9 @@ export async function run(inlineConfig?: ContribkitConfig, t = consola) {
           for (const [provider, login] of Object.entries(ship.sponsor.socialLogins)) {
             const matched = allSponsors.filter(s => s.sponsor.login === login && s.provider === provider)
             if (matched)
-              pushGroup([ship, ...matched])
+              pushSponsorGroup(sponsorsMergeMap, [ship, ...matched])
           }
         }
-      }
-
-      function mergeSponsors(main: Sponsorship, sponsors: Sponsorship[]) {
-        const all = [main, ...sponsors]
-        main.isOneTime = all.every(s => s.isOneTime)
-        main.expireAt = all.map(s => s.expireAt).filter(notNullish).sort((a, b) => b.localeCompare(a))[0]
-        main.createdAt = all.map(s => s.createdAt).filter(notNullish).sort((a, b) => a.localeCompare(b))[0]
-        main.monthlyDollars = all.every(s => s.monthlyDollars === -1)
-          ? -1
-          : all.filter(s => s.monthlyDollars > 0).reduce((a, b) => a + b.monthlyDollars, 0)
-        main.provider = [...new Set(all.map(s => s.provider))].join('+')
-        return main
       }
 
       const removeSponsors = new Set<Sponsorship>()
@@ -218,10 +170,10 @@ export async function run(inlineConfig?: ContribkitConfig, t = consola) {
   allSponsors.sort((a, b) =>
     b.monthlyDollars - a.monthlyDollars // DESC amount
     || Date.parse(b.createdAt!) - Date.parse(a.createdAt!) // DESC date
-    || (b.sponsor.login || b.sponsor.name).localeCompare(a.sponsor.login || a.sponsor.name), // ASC name
+    || (b.sponsor.login ?? b.sponsor.name).localeCompare(a.sponsor.login ?? a.sponsor.name), // ASC name
   )
 
-  allSponsors = await config.onSponsorsReady?.(allSponsors) || allSponsors
+  allSponsors = (await config.onSponsorsReady?.(allSponsors)) ?? allSponsors
 
   if (config.renders?.length) {
     t.info(`Generating with ${config.renders.length} renders...`)
@@ -230,7 +182,7 @@ export async function run(inlineConfig?: ContribkitConfig, t = consola) {
         ...fullConfig,
         ...renderOptions,
       }
-      const renderer = builtinRenderers[mergedOptions.renderer || 'tiers']
+      const renderer = builtinRenderers[mergedOptions.renderer ?? 'tiers']
       await applyRenderer(
         renderer,
         config,
@@ -241,7 +193,7 @@ export async function run(inlineConfig?: ContribkitConfig, t = consola) {
     }))
   }
   else {
-    const renderer = builtinRenderers[fullConfig.renderer || 'tiers']
+    const renderer = builtinRenderers[fullConfig.renderer ?? 'tiers']
     await applyRenderer(
       renderer,
       config,
@@ -260,7 +212,7 @@ export async function applyRenderer(
   t = consola,
 ) {
   sponsors = [...sponsors]
-  sponsors = await renderOptions.onBeforeRenderer?.(sponsors) || sponsors
+  sponsors = (await renderOptions.onBeforeRenderer?.(sponsors)) ?? sponsors
 
   const logPrefix = c.dim`[${renderOptions.name}]`
   const dir = resolve(process.cwd(), config.outputDir)
@@ -271,14 +223,13 @@ export async function applyRenderer(
   if (!renderOptions.includePrivate)
     sponsors = sponsors.filter(s => s.privacyLevel !== 'PRIVATE')
 
-  if (!renderOptions.imageFormat)
-    renderOptions.imageFormat = 'webp'
+  renderOptions.imageFormat ??= 'webp'
 
   const processingSvg = (async () => {
     let svgWebp = await renderer.renderSVG(renderOptions, sponsors)
 
     if (renderOptions.onSvgGenerated) {
-      svgWebp = await renderOptions.onSvgGenerated(svgWebp) || svgWebp
+      svgWebp = (await renderOptions.onSvgGenerated(svgWebp)) ?? svgWebp
     }
     return svgWebp
   })()
@@ -286,59 +237,95 @@ export async function applyRenderer(
   if (renderOptions.formats) {
     let svgPng: Promise<string> | undefined
 
-    await Promise.all([
-      renderOptions.formats.map(async (format) => {
-        if (!outputFormats.includes(format))
-          throw new Error(`Unsupported format: ${format}`)
+    await Promise.all(renderOptions.formats.map(async (format) => {
+      if (!outputFormats.includes(format))
+        throw new Error(`Unsupported format: ${format}`)
 
-        const path = join(dir, `${renderOptions.name}.${format}`)
+      const path = join(dir, `${renderOptions.name}.${format}`)
 
-        let data: string | Buffer
+      let data: string | Buffer
 
-        if (format === 'svg') {
-          t.info(`${logPrefix} Composing SVG...`)
-          data = await processingSvg
-        }
+      if (format === 'svg') {
+        t.info(`${logPrefix} Composing SVG...`)
+        data = await processingSvg
+      }
+      else if (format === 'json') {
+        data = JSON.stringify(sponsors, null, 2)
+      }
+      else {
+        svgPng ??= renderer.renderSVG({
+          ...renderOptions,
+          imageFormat: 'png',
+        }, sponsors)
 
-        if (format === 'json') {
-          data = JSON.stringify(sponsors, null, 2)
-        }
+        const pngSvg = await svgPng
+        data = format === 'png'
+          ? await svgToPng(pngSvg)
+          : await svgToWebp(pngSvg)
+      }
 
-        if (format === 'png' || format === 'webp') {
-          if (!svgPng) {
-            // Sharp can't render embedded Webp so re-generate with png
-            // https://github.com/lovell/sharp/issues/4254
-            svgPng = renderer.renderSVG({
-              ...renderOptions,
-              imageFormat: 'png',
-            }, sponsors)
-          }
+      await fsp.writeFile(path, data)
 
-          if (format === 'png') {
-            data = await svgToPng(await svgPng)
-          }
-
-          if (format === 'webp') {
-            data = await svgToWebp(await svgPng)
-          }
-        }
-
-        await fsp.writeFile(path, data!)
-
-        t.success(`${logPrefix} Wrote to ${r(path)}`)
-      }),
-    ])
+      t.success(`${logPrefix} Wrote to ${r(path)}`)
+    }))
   }
 }
 
+function pushSponsorGroup(sponsorsMergeMap: Map<Sponsorship, Set<Sponsorship>>, group: Sponsorship[]) {
+  const existingSets = new Set(group.map(s => sponsorsMergeMap.get(s)).filter(notNullish))
+  let set = existingSets.values().next().value
+  if (!set) {
+    set = new Set(group)
+  }
+  // Multiple sets, merge them into one
+  else if (existingSets.size > 1) {
+    set = new Set()
+    for (const existingSet of existingSets) {
+      for (const sponsor of existingSet)
+        set.add(sponsor)
+    }
+  }
+
+  for (const sponsor of group) {
+    set.add(sponsor)
+    sponsorsMergeMap.set(sponsor, set)
+  }
+}
+
+function matchSponsor(sponsor: Sponsorship, matcher: SponsorMatcher) {
+  if (matcher.provider && sponsor.provider !== matcher.provider)
+    return false
+  if (matcher.login && sponsor.sponsor.login !== matcher.login)
+    return false
+  if (matcher.name && sponsor.sponsor.name !== matcher.name)
+    return false
+  if (matcher.type && sponsor.sponsor.type !== matcher.type)
+    return false
+  return true
+}
+
+function mergeSponsors(main: Sponsorship, sponsors: Sponsorship[]) {
+  const all = [main, ...sponsors]
+  main.isOneTime = all.every(s => s.isOneTime)
+  main.expireAt = all.map(s => s.expireAt).filter(notNullish).sort((a, b) => b.localeCompare(a))[0]
+  main.createdAt = all.map(s => s.createdAt).filter(notNullish).sort((a, b) => a.localeCompare(b))[0]
+  main.monthlyDollars = all.every(s => s.monthlyDollars === -1)
+    ? -1
+    : all.filter(s => s.monthlyDollars > 0).reduce((a, b) => a + b.monthlyDollars, 0)
+  main.provider = [...new Set(all.map(s => s.provider))].join('+')
+  return main
+}
+
+type Replacement = ((sponsor: Sponsorship) => string) | [string, string]
+
 function normalizeReplacements(replaces: ContribkitMainConfig['replaceLinks']) {
   const array = (Array.isArray(replaces) ? replaces : [replaces]).filter(notNullish)
-  const entries = array.map((i) => {
-    if (!i)
-      return []
-    if (typeof i === 'function')
-      return [i]
-    return Object.entries(i) as [string, string][]
-  }).flat()
+  const entries: Replacement[] = []
+  for (const item of array) {
+    if (typeof item === 'function')
+      entries.push(item)
+    else
+      entries.push(...Object.entries(item) as [string, string][])
+  }
   return entries
 }

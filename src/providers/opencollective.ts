@@ -70,13 +70,12 @@ export async function fetchOpenCollectiveSponsors(
 
       sponsors.push(...(nodes || []))
 
-      if ((nodes.length) !== 0) {
-        if (totalCount > offset + nodes.length)
-          offset += nodes.length
-        else
-          offset = undefined
-      }
-      else { offset = undefined }
+      if (nodes.length === 0)
+        offset = undefined
+      else if (totalCount > offset + nodes.length)
+        offset += nodes.length
+      else
+        offset = undefined
     } while (offset)
   }
 
@@ -99,13 +98,12 @@ export async function fetchOpenCollectiveSponsors(
     const totalCount = data.data.account.transactions.totalCount
 
     monthlyTransactions.push(...(nodes || []))
-    if ((nodes.length) !== 0) {
-      if (totalCount > offset + nodes.length)
-        offset += nodes.length
-      else
-        offset = undefined
-    }
-    else { offset = undefined }
+    if (nodes.length === 0)
+      offset = undefined
+    else if (totalCount > offset + nodes.length)
+      offset += nodes.length
+    else
+      offset = undefined
   } while (offset)
 
   const sponsorships: [string, Sponsorship][] = sponsors
@@ -139,12 +137,12 @@ export async function fetchOpenCollectiveSponsors(
   const transactionsBySponsorId: Map<string, Sponsorship> = monthlySponsorships.reduce((map, [id, sponsor]) => {
     const existingSponsor = map.get(id)
     if (existingSponsor) {
-      const createdAt = new Date(sponsor.createdAt!)
-      const existingSponsorCreatedAt = new Date(existingSponsor.createdAt!)
+      const createdAt = toDate(sponsor.createdAt)
+      const existingSponsorCreatedAt = toDate(existingSponsor.createdAt)
       if (createdAt >= existingSponsorCreatedAt)
         map.set(id, sponsor)
 
-      else if (new Date(existingSponsorCreatedAt.getFullYear(), existingSponsorCreatedAt.getMonth(), 1) === new Date(createdAt.getFullYear(), createdAt.getMonth(), 1))
+      else if (isSameMonth(existingSponsorCreatedAt, createdAt))
         existingSponsor.monthlyDollars += sponsor.monthlyDollars
     }
     else { map.set(id, sponsor) }
@@ -156,8 +154,8 @@ export async function fetchOpenCollectiveSponsors(
     .reduce((map, [id, sponsor]) => {
       const existingSponsor = map.get(id)
       if (existingSponsor) {
-        const createdAt = new Date(sponsor.createdAt!)
-        const existingSponsorCreatedAt = new Date(existingSponsor.createdAt!)
+        const createdAt = toDate(sponsor.createdAt)
+        const existingSponsorCreatedAt = toDate(existingSponsor.createdAt)
         if (createdAt >= existingSponsorCreatedAt)
           map.set(id, sponsor)
       }
@@ -195,7 +193,7 @@ function createSponsorFromOrder(order: any): [string, Sponsorship] | undefined {
       avatarUrl: order.fromAccount.imageUrl,
       websiteUrl: normalizeUrl(getBestUrl(order.fromAccount.socialLinks)),
       linkUrl: `https://opencollective.com/${slug}`,
-      socialLogins: getSocialLogins(order.fromAccount.socialLinks, slug),
+      socialLogins: getSocialLogins(slug, order.fromAccount.socialLinks),
     },
     isOneTime: order.frequency === 'ONETIME',
     monthlyDollars,
@@ -242,14 +240,14 @@ function createSponsorFromTransaction(transaction: any, excludeOrders: string[],
       type: getAccountType(account.type),
       login: slug,
       avatarUrl: account.imageUrl,
-      websiteUrl: normalizeUrl(getBestUrl(account.socialLinks || [])),
+      websiteUrl: normalizeUrl(getBestUrl(account.socialLinks ?? [])),
       linkUrl: `https://opencollective.com/${slug}`,
-      socialLogins: getSocialLogins(account.socialLinks || [], slug),
+      socialLogins: getSocialLogins(slug, account.socialLinks),
     },
     isOneTime: transaction.order?.frequency === 'ONETIME',
     monthlyDollars,
     privacyLevel: sponseesMode ? 'PUBLIC' : (account.isIncognito ? 'PRIVATE' : 'PUBLIC'),
-    tierName: transaction.order?.tier?.name || transaction.tier?.name,
+    tierName: transaction.order?.tier?.name ?? transaction.tier?.name,
     createdAt: sponseesMode
       ? transaction.createdAt
       : transaction.order?.frequency === 'ONETIME'
@@ -432,13 +430,21 @@ function getBestUrl(socialLinks: SocialLink[]): string | undefined {
   return urls[0]
 }
 
+function isSameMonth(a: Date, b: Date) {
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth()
+}
+
+function toDate(value: string | undefined) {
+  return new Date(value ?? Number.NaN)
+}
+
 const RE_GITHUB_URL = /github\.com\/([^/]*)/
 
-function getSocialLogins(socialLinks: SocialLink[] = [], opencollectiveLogin: string): Record<string, string> {
+function getSocialLogins(opencollectiveLogin: string, socialLinks: SocialLink[] = []): Record<string, string> {
   const socialLogins: Record<string, string> = {}
   for (const link of socialLinks) {
     if (link.type === 'GITHUB') {
-      const login = link.url.match(RE_GITHUB_URL)?.[1]
+      const login = RE_GITHUB_URL.exec(link.url)?.[1]
       if (login)
         socialLogins.github = login
     }

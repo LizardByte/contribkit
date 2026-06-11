@@ -109,5 +109,7 @@ export async function fetchAfdianSponsors(options: ContribkitConfig['afdian'] = 
 }
 
 function md5(token: string, params: string, ts: number, userId: string) {
-  return createHash('md5').update(`${token}params${params}ts${ts}user_id${userId}`).digest('hex')
+  return createHash('md5') // NOSONAR(typescript:S4790): Afdian requires MD5 request signatures.
+    .update(`${token}params${params}ts${ts}user_id${userId}`)
+    .digest('hex')
 }

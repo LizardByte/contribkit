@@ -64,7 +64,7 @@ export interface Sponsorship {
   createdAt?: string
   expireAt?: string
   isOneTime?: boolean
-  provider?: ProviderName | string
+  provider?: string
   /**
    * Raw data from provider
    */
@@ -76,6 +76,7 @@ export const outputFormats = ['svg', 'png', 'webp', 'json'] as const
 export type OutputFormat = typeof outputFormats[number]
 
 export type ProviderName = 'github' | 'patreon' | 'opencollective' | 'afdian' | 'polar' | 'liberapay' | 'githubContributors' | 'gitlabContributors' | 'crowdinContributors' | 'githubContributions'
+export type HookResult<T> = PromiseLike<T | void | undefined | null> | T | void | undefined | null
 
 export type GitHubAccountType = 'user' | 'organization'
 export type SponsorshipMode = 'sponsors' | 'sponsees'
@@ -340,12 +341,12 @@ export interface ContribkitRenderOptions {
   /**
    * Hook to modify sponsors data before rendering.
    */
-  onBeforeRenderer?: (sponsors: Sponsorship[]) => PromiseLike<void | Sponsorship[]> | void | Sponsorship[]
+  onBeforeRenderer?: (sponsors: Sponsorship[]) => HookResult<Sponsorship[]>
 
   /**
    * Hook to get or modify the SVG before writing.
    */
-  onSvgGenerated?: (svg: string) => PromiseLike<string | void | undefined | null> | string | void | undefined | null
+  onSvgGenerated?: (svg: string) => HookResult<string>
 }
 
 export interface ContribkitConfig extends ProvidersConfig, ContribkitRenderOptions {
@@ -427,17 +428,17 @@ export interface ContribkitConfig extends ProvidersConfig, ContribkitRenderOptio
   /**
    * Hook to modify sponsors data for each provider.
    */
-  onSponsorsFetched?: (sponsors: Sponsorship[], provider: ProviderName | string) => PromiseLike<void | Sponsorship[]> | void | Sponsorship[]
+  onSponsorsFetched?: (sponsors: Sponsorship[], provider: string) => HookResult<Sponsorship[]>
 
   /**
    * Hook to modify merged sponsors data before fetching the avatars.
    */
-  onSponsorsAllFetched?: (sponsors: Sponsorship[]) => PromiseLike<void | Sponsorship[]> | void | Sponsorship[]
+  onSponsorsAllFetched?: (sponsors: Sponsorship[]) => HookResult<Sponsorship[]>
 
   /**
    * Hook to modify sponsors data before rendering.
    */
-  onSponsorsReady?: (sponsors: Sponsorship[]) => PromiseLike<void | Sponsorship[]> | void | Sponsorship[]
+  onSponsorsReady?: (sponsors: Sponsorship[]) => HookResult<Sponsorship[]>
 
   /**
    * Url to fallback avatar.
@@ -457,7 +458,7 @@ export interface ContribkitConfig extends ProvidersConfig, ContribkitRenderOptio
 }
 
 export interface SponsorMatcher extends Partial<Pick<Sponsor, 'login' | 'name' | 'type'>> {
-  provider?: ProviderName | string
+  provider?: string
 }
 
 export type ContribkitMainConfig = Omit<ContribkitConfig, keyof ContribkitRenderOptions>

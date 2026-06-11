@@ -42,13 +42,13 @@ export async function generateBadge(
   const { size } = preset.avatar
   let avatar = sponsor.avatarBuffer!
   if (size < 50) {
-    avatar = await resizeImage(avatar, 50, imageFormat)
+    avatar = await resizeImage(avatar, imageFormat, 50)
   }
   else if (size < 80) {
-    avatar = await resizeImage(avatar, 80, imageFormat)
+    avatar = await resizeImage(avatar, imageFormat, 80)
   }
   else if (imageFormat === 'png') {
-    avatar = await resizeImage(avatar, 120, imageFormat)
+    avatar = await resizeImage(avatar, imageFormat, 120)
   }
 
   const avatarBase64 = avatar.toString('base64')
@@ -122,5 +122,5 @@ ${this.body}
 }
 
 function encodeHtmlEntities(str: string) {
-  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+  return String(str).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;')
 }
