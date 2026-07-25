@@ -1,12 +1,12 @@
-import type { ContribkitConfig, Sponsorship, Tier, TierPartition } from '../types'
+import type { ContribkitConfig, Sponsorship, Tier, TierPartition } from '../types.js'
 import { loadConfig as _loadConfig } from 'unconfig'
-import { defaultConfig } from './defaults'
-import { loadEnv } from './env'
-import { FALLBACK_AVATAR } from './fallback'
+import { defaultConfig } from './defaults.js'
+import { loadEnv } from './env.js'
+import { FALLBACK_AVATAR } from './fallback.js'
 
-export * from './defaults'
-export * from './fallback'
-export * from './tier-presets'
+export * from './defaults.js'
+export * from './fallback.js'
+export * from './tier-presets.js'
 
 export function defineConfig(config: ContribkitConfig): ContribkitConfig {
   return config

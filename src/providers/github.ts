@@ -1,7 +1,7 @@
-import type { ContribkitConfig, GitHubAccountType, Provider, Sponsorship, Tier } from '../types'
+import type { ContribkitConfig, GitHubAccountType, Provider, Sponsorship, Tier } from '../types.js'
 import { $fetch } from 'ofetch'
-import { getCredentials } from '../configs/credentials'
-import { normalizeUrl } from '../utils'
+import { getCredentials } from '../configs/credentials.js'
+import { normalizeUrl } from '../utils.js'
 
 function getMonthDifference(startDate: Date, endDate: Date) {
   return (endDate.getFullYear() - startDate.getFullYear()) * 12 + (endDate.getMonth() - startDate.getMonth())

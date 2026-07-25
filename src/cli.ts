@@ -1,7 +1,7 @@
-import type { ContribkitConfig } from './types'
+import type { ContribkitConfig } from './types.js'
 import cac from 'cac'
 import { version } from '../package.json'
-import { run } from './run'
+import { run } from './run.js'
 
 const RE_FILTER = /^(<=?|>=?)(\d+)$/
 const cli = cac('contributors-svg')

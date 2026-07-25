@@ -1,5 +1,5 @@
 import type { Credentials, ReportsModel } from '@crowdin/crowdin-api-client'
-import type { Provider, Sponsorship } from '../types'
+import type { Provider, Sponsorship } from '../types.js'
 import { ProjectsGroups, Reports } from '@crowdin/crowdin-api-client'
 
 interface Member {

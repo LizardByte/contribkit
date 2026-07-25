@@ -1,5 +1,5 @@
-import type { ContribkitConfig, Tier } from '../types'
-import { tierPresets } from './tier-presets'
+import type { ContribkitConfig, Tier } from '../types.js'
+import { tierPresets } from './tier-presets.js'
 
 export const defaultTiers: Tier[] = [
   {

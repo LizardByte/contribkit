@@ -4,7 +4,6 @@ import { fileURLToPath } from 'node:url'
 
 import { codecovVitePlugin } from '@codecov/vite-plugin'
 import { defineConfig } from 'vite'
-import dts from 'vite-plugin-dts'
 
 import packageJson from './package.json'
 
@@ -43,12 +42,6 @@ export default defineConfig({
     target: 'esnext',
   },
   plugins: [
-    dts({
-      entryRoot: 'src',
-      include: ['src'],
-      bundleTypes: true,
-      tsconfigPath: './tsconfig.json',
-    }),
     // The Codecov vite plugin should be after all other plugins
     codecovVitePlugin({
       enableBundleAnalysis: process.env.CODECOV_TOKEN !== undefined,

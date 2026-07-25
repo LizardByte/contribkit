@@ -1,7 +1,7 @@
-import type { ContribkitConfig, Provider, Sponsorship } from '../types'
+import type { ContribkitConfig, Provider, Sponsorship } from '../types.js'
 import { createHash } from 'node:crypto'
 import { $fetch } from 'ofetch'
-import { getCredentials } from '../configs/credentials'
+import { getCredentials } from '../configs/credentials.js'
 
 // afdian api docs https://afdian.net/p/9c65d9cc617011ed81c352540025c377
 
