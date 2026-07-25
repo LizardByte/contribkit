@@ -90,6 +90,11 @@
     ],
     "testEnvironment": "jsdom"
   },
+  "overrides": {
+    "@codecov/vite-plugin": {
+      "vite": "$vite"
+    }
+  },
   "resolutions": {
     "contribkit": "workspace:*"
   }
