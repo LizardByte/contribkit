@@ -1,5 +1,5 @@
 import type { Buffer } from 'node:buffer'
-import type { ContribkitConfig, ContribkitMainConfig, ContribkitRenderer, ContribkitRenderOptions, SponsorMatcher, Sponsorship } from './types'
+import type { ContribkitConfig, ContribkitMainConfig, ContribkitRenderer, ContribkitRenderOptions, SponsorMatcher, Sponsorship } from './types.js'
 import fs from 'node:fs'
 import fsp from 'node:fs/promises'
 import { dirname, join, relative, resolve } from 'node:path'
@@ -8,12 +8,12 @@ import { notNullish } from '@antfu/utils'
 import c from 'ansis'
 import { consola } from 'consola'
 import { version } from '../package.json'
-import { parseCache, stringifyCache } from './cache'
-import { loadConfig } from './configs'
-import { resolveAvatars, svgToPng, svgToWebp } from './processing/image'
-import { guessProviders, resolveProviders } from './providers'
-import { builtinRenderers } from './renders'
-import { outputFormats } from './types'
+import { parseCache, stringifyCache } from './cache.js'
+import { loadConfig } from './configs/index.js'
+import { resolveAvatars, svgToPng, svgToWebp } from './processing/image.js'
+import { guessProviders, resolveProviders } from './providers/index.js'
+import { builtinRenderers } from './renders/index.js'
+import { outputFormats } from './types.js'
 
 type Logger = typeof consola
 type ResolvedConfig = Required<ContribkitConfig>
@@ -27,7 +27,7 @@ export {
 
   tiersComposer,
   tiersRenderer,
-} from './renders/tiers'
+} from './renders/tiers.js'
 
 function r(path: string) {
   return `./${relative(process.cwd(), path)}`

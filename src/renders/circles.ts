@@ -1,5 +1,5 @@
-import type { ContribkitRenderer, Sponsorship } from '../types'
-import { generateBadge, SvgComposer } from '../processing/svg'
+import type { ContribkitRenderer, Sponsorship } from '../types.js'
+import { generateBadge, SvgComposer } from '../processing/svg.js'
 
 interface SponsorHierarchy extends Sponsorship {
   children?: Sponsorship[]

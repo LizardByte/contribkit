@@ -1,6 +1,6 @@
-import type { Provider, Sponsorship } from '../types'
+import type { Provider, Sponsorship } from '../types.js'
 import { ofetch } from 'ofetch'
-import { getCredentials } from '../configs/credentials'
+import { getCredentials } from '../configs/credentials.js'
 
 export const PolarProvider: Provider = {
   name: 'polar',

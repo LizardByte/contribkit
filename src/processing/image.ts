@@ -1,4 +1,4 @@
-import type { ContribkitConfig, ImageFormat, Sponsorship } from '../types'
+import type { ContribkitConfig, ImageFormat, Sponsorship } from '../types.js'
 import { Buffer } from 'node:buffer'
 import { consola } from 'consola'
 import { $fetch } from 'ofetch'

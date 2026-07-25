@@ -1,4 +1,4 @@
-import type { ContribkitConfig } from '../types'
+import type { ContribkitConfig } from '../types.js'
 import process from 'node:process'
 import dotenv from 'dotenv'
 

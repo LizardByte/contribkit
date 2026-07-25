@@ -1,4 +1,4 @@
-import type { Provider, Sponsorship } from '../types'
+import type { Provider, Sponsorship } from '../types.js'
 import { $fetch } from 'ofetch'
 
 export const LiberapayProvider: Provider = {

@@ -1,7 +1,7 @@
-import type { Provider, Sponsorship } from '../types'
+import type { Provider, Sponsorship } from '../types.js'
 import { $fetch } from 'ofetch'
-import { getCredentials } from '../configs/credentials'
-import { normalizeUrl } from '../utils'
+import { getCredentials } from '../configs/credentials.js'
+import { normalizeUrl } from '../utils.js'
 
 interface SocialLink {
   type: string

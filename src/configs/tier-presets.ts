@@ -1,4 +1,4 @@
-import type { BadgePreset } from '../types'
+import type { BadgePreset } from '../types.js'
 
 const none: BadgePreset = {
   avatar: {

@@ -1,7 +1,7 @@
-import type { ContribkitConfig, GitHubAccountType } from '../types'
+import type { ContribkitConfig, GitHubAccountType } from '../types.js'
 import process from 'node:process'
 import dotenv from 'dotenv'
-import { loadEnvCredentials, pruneUndefined } from './credentials'
+import { loadEnvCredentials, pruneUndefined } from './credentials.js'
 
 export interface EnvConfig {
   config: Partial<ContribkitConfig>

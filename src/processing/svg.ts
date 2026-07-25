@@ -1,6 +1,6 @@
-import type { BadgePreset, ContribkitRenderOptions, ImageFormat, Sponsor, Sponsorship } from '../types'
+import type { BadgePreset, ContribkitRenderOptions, ImageFormat, Sponsor, Sponsorship } from '../types.js'
 import crypto from 'node:crypto'
-import { resizeImage } from './image'
+import { resizeImage } from './image.js'
 
 export function genSvgImage(
   x: number,
