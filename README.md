@@ -1,10 +1,23 @@
-# ContribKit
+<div align="center">
+  <img
+    src="https://raw.githubusercontent.com/LizardByte/.github/refs/heads/master/branding/logos/logo.svg"
+    alt="LizardByte icon"
+    width="256"
+  />
+  <h1 align="center">ContribKit</h1>
+  <h4 align="center">Toolkit for generating contributor/sponsors images.</h4>
+</div>
 
-[![GitHub stars](https://img.shields.io/github/stars/lizardbyte/contribkit.svg?logo=github&style=for-the-badge)](https://github.com/LizardByte/contribkit)
-[![GitHub Workflow Status (CI)](https://img.shields.io/github/actions/workflow/status/lizardbyte/contribkit/_ci-node.yml.svg?branch=master&label=CI%20build&logo=github&style=for-the-badge)](https://github.com/LizardByte/contribkit/actions/workflows/_ci-node.yml?query=branch%3Amaster)
-[![Codecov](https://img.shields.io/codecov/c/gh/LizardByte/contribkit?token=WBivqQDwFw&style=for-the-badge&logo=codecov&label=codecov)](https://codecov.io/gh/LizardByte/contribkit)
-[![NPM Monthly Downloads](https://img.shields.io/npm/dm/%40lizardbyte%2Fcontribkit?style=for-the-badge&logo=npm&label=npm%20downloads/m)](https://www.npmjs.com/package/@lizardbyte/contribkit)
-[![NPM Version](https://img.shields.io/npm/v/%40lizardbyte%2Fcontribkit?style=for-the-badge&logo=npm&label=npm%20version)](https://www.npmjs.com/package/@lizardbyte/contribkit)
+<div align="center">
+  <a href="https://github.com/LizardByte/contribkit"><img src="https://img.shields.io/github/stars/lizardbyte/contribkit.svg?logo=github&style=for-the-badge" alt="GitHub stars"></a>
+  <a href="https://www.npmjs.com/package/@lizardbyte/contribkit"><img src="https://img.shields.io/npm/v/%40lizardbyte%2Fcontribkit?style=for-the-badge&logo=npm&label=npm%20version" alt="NPM Version"></a>
+  <a href="https://www.npmjs.com/package/@lizardbyte/contribkit"><img src="https://img.shields.io/npm/dm/%40lizardbyte%2Fcontribkit?style=for-the-badge&logo=npm&label=npm%20downloads/m" alt="NPM Monthly Downloads"></a>
+  <a href="https://github.com/LizardByte/contribkit/actions/workflows/_ci-node.yml?query=branch%3Amaster"><img src="https://img.shields.io/github/actions/workflow/status/lizardbyte/contribkit/_ci-node.yml.svg?branch=master&label=CI%20build&logo=github&style=for-the-badge" alt="GitHub Workflow Status (CI)"></a>
+  <a href="https://codecov.io/gh/LizardByte/contribkit"><img src="https://img.shields.io/endpoint.svg?url=https%3A%2F%2Fapp.lizardbyte.dev%2Fdashboard%2Fshields%2Fcodecov%2Fcontribkit.json&style=for-the-badge&logo=codecov" alt="Codecov"></a>
+  <a href="https://sonarcloud.io/project/overview?id=LizardByte_contribkit"><img src="https://img.shields.io/sonar/quality_gate/LizardByte_contribkit.svg?server=https%3A%2F%2Fsonarcloud.io&style=for-the-badge&logo=sonarqubecloud&label=sonarcloud" alt="SonarCloud"></a>
+</div>
+
+## Overview
 
 Toolkit for fetching contributor info and generating contributor images.
 This is a fork of [sponsorkit](https://github.com/antfu-collective/sponsorkit) that supports contributors.
