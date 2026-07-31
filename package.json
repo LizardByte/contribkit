@@ -82,7 +82,7 @@
     "p-limit": "^7.3.0",
     "tsx": "^4.22.3",
     "typescript": "^7.0.0",
-    "vite": "8.1.5"
+    "vite": "8.2.0"
   },
   "jest": {
     "collectCoverageFrom": [
