@@ -53,7 +53,7 @@ export async function fetchPolarSponsors(token: string | undefined, organization
       organization_id: orgId,
       page,
     }
-    const subs = await apiFetch('/subscriptions', { params })
+    const subs = await apiFetch('/subscriptions', { params }) // NOSONAR(typescript:S9382): Each response supplies the pagination limit used to decide whether to fetch the next page.
     subscriptions.push(...subs.items)
 
     pages = subs.pagination.max_page

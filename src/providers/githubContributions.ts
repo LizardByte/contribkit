@@ -156,7 +156,7 @@ async function discoverReposFromMergedPRs(
 
     do {
       type SearchResponse = { data: { search: { pageInfo: { hasNextPage: boolean; endCursor: string | null }; edges: Array<{ node: { repository?: RepoNode } }> } } }
-      const response: SearchResponse = await graphqlFetch<SearchResponse>({
+      const response: SearchResponse = await graphqlFetch<SearchResponse>({ // NOSONAR(typescript:S9382): Each search page requires the previous response's endCursor.
         query: `
           query($searchQuery: String!, $after: String) {
             search(query: $searchQuery, type: ISSUE, first: 100, after: $after) {
@@ -214,20 +214,21 @@ async function fetchMergedPRCounts(
 ): Promise<Map<string, number>> {
   console.log(`[contribkit][githubContributions] fetching merged PR counts per repository...`)
   const repoPRs = new Map<string, number>()
-  const batchSize = 10
+  const pLimit = await import('p-limit').then(r => r.default)
+  const limit = pLimit(10)
+  let processed = 0
+  const counts = await Promise.all(allRepos.map(repo => limit(async () => {
+    const count = await fetchPRCountForRepo(graphqlFetch, repo, login)
+    processed++
+    if (processed % 10 === 0 && processed < allRepos.length)
+      console.log(`[contribkit][githubContributions] processed PR counts for ${processed}/${allRepos.length} repos...`)
+    return count
+  })))
 
-  for (let i = 0; i < allRepos.length; i += batchSize) {
-    const batch = allRepos.slice(i, i + batchSize)
-    const counts = await Promise.all(batch.map(repo => fetchPRCountForRepo(graphqlFetch, repo, login)))
-
-    for (let index = 0; index < batch.length; index++) {
-      const count = counts[index]
-      if (count > 0)
-        repoPRs.set(batch[index].nameWithOwner, count)
-    }
-
-    if (i + batchSize < allRepos.length)
-      console.log(`[contribkit][githubContributions] processed PR batches for ${Math.min(i + batchSize, allRepos.length)}/${allRepos.length} repos...`)
+  for (let index = 0; index < allRepos.length; index++) {
+    const count = counts[index]
+    if (count > 0)
+      repoPRs.set(allRepos[index].nameWithOwner, count)
   }
 
   console.log(`[contribkit][githubContributions] found merged PR counts for ${repoPRs.size} repositories`)

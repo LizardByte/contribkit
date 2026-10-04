@@ -116,7 +116,7 @@ async function fetchOpenCollectivePages(
   const nodes: any[] = []
   let offset: number | undefined = 0
   while (offset !== undefined) {
-    const data = await fetchOpenCollectivePage(key, makeQuery(offset))
+    const data = await fetchOpenCollectivePage(key, makeQuery(offset)) // NOSONAR(typescript:S9382): The next offset depends on the returned node count and total.
     const connection = getConnection(data)
     const pageNodes = connection.nodes ?? []
     nodes.push(...pageNodes)
