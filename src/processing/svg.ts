@@ -107,7 +107,7 @@ export class SvgComposer {
     const perLine = Math.floor((this.config.width - (preset.container?.sidePadding || 0) * 2) / preset.boxWidth)
 
     for (let i = 0; i < Math.ceil(sponsors.length / perLine); i++) {
-      await this.addSponsorLine(sponsors.slice(i * perLine, (i + 1) * perLine), preset)
+      await this.addSponsorLine(sponsors.slice(i * perLine, (i + 1) * perLine), preset) // NOSONAR(typescript:S9382): Each row uses the height advanced by the previous row.
     }
 
     return this

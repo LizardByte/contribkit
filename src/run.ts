@@ -130,9 +130,9 @@ async function fetchProviderSponsors(config: ResolvedMainConfig, providers: Retu
   const allSponsors: Sponsorship[] = []
   for (const provider of providers) {
     t.info(`Fetching sponsorships from ${provider.name}...`)
-    let sponsors = await provider.fetchSponsors(config)
+    let sponsors = await provider.fetchSponsors(config) // NOSONAR(typescript:S9382): Preserve provider/hook order and stop later fetches if the current provider fails.
     sponsors.forEach(s => s.provider = provider.name)
-    sponsors = (await config.onSponsorsFetched?.(sponsors, provider.name)) ?? sponsors
+    sponsors = (await config.onSponsorsFetched?.(sponsors, provider.name)) ?? sponsors // NOSONAR(typescript:S9382): Provider hooks run in configured order before subsequent fetches.
     t.success(`${sponsors.length} sponsorships fetched from ${provider.name}`)
     allSponsors.push(...sponsors)
   }

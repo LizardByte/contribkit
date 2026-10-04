@@ -77,7 +77,7 @@ export async function fetchGitHubSponsors(
   const tiers = config.tiers?.filter(tier => tier.monthlyDollars && tier.monthlyDollars > 0).sort((a, b) => b.monthlyDollars! - a.monthlyDollars!)
   do {
     const query = makeQuery(login, type, !config.includePastSponsors, cursor)
-    const data = await requestGitHubGraphQL(token, query)
+    const data = await requestGitHubGraphQL(token, query) // NOSONAR(typescript:S9382): Each page requires the previous response's endCursor.
 
     sponsors.push(
       ...(data.data[type].sponsorshipsAsMaintainer.nodes || []),
@@ -241,7 +241,7 @@ async function fetchGitHubSponsoringNodes(
 
   do {
     const query = makeSponsoringQuery(login, type, activeOnly, cursor)
-    const data = await requestGitHubGraphQL(token, query)
+    const data = await requestGitHubGraphQL(token, query) // NOSONAR(typescript:S9382): Each page requires the previous response's endCursor.
     const page = data.data?.[type]?.sponsorshipsAsSponsor
     if (!page)
       throw new Error('Invalid GitHub response: `sponsorshipsAsSponsor` is missing')

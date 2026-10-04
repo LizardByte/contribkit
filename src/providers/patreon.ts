@@ -36,7 +36,7 @@ export async function fetchPatreonSponsors(token: string | undefined): Promise<S
   let sponsorshipApi = `https://www.patreon.com/api/oauth2/v2/campaigns/${userCampaignId}/members?include=user,currently_entitled_tiers&fields%5Bmember%5D=currently_entitled_amount_cents,patron_status,pledge_relationship_start,lifetime_support_cents&fields%5Buser%5D=image_url,url,first_name,full_name&fields%5Btier%5D=amount_cents&page%5Bcount%5D=100`
   do {
     // Get pledges from the campaign
-    const sponsorshipData = await $fetch(sponsorshipApi, {
+    const sponsorshipData = await $fetch(sponsorshipApi, { // NOSONAR(typescript:S9382): The next page URL is supplied by this response.
       method: 'GET',
       headers: {
         'Authorization': `bearer ${token}`,

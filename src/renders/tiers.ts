@@ -9,7 +9,7 @@ export async function tiersComposer(composer: SvgComposer, sponsors: Sponsorship
   composer.addSpan(config.padding?.top ?? 20)
 
   for (const partition of tierPartitions)
-    await composeTier(composer, partition.sponsors, partition.tier, config)
+    await composeTier(composer, partition.sponsors, partition.tier, config) // NOSONAR(typescript:S9382): Tiers update the shared composer height/body and run hooks in order.
 
   composer.addSpan(config.padding?.bottom ?? 20)
 }

@@ -108,6 +108,78 @@ async function github(failYear) {
   assert.equal(warnings.length, failYear ? 1 : 0)
 }
 
+async function githubCounts() {
+  const repos = Array.from({ length: 25 }, (_, i) => ({
+    ...repository(new Date().getFullYear()),
+    nameWithOwner: `owner${i}/repo`,
+    owner: { ...repository(0).owner, login: `owner${i}` },
+  }))
+  const gate = requestGate(10)
+  const warnings = []
+  const completed = []
+  let active = 0
+  let maximum = 0
+  let releaseSlowRequest
+  const nextRequestStarted = new Promise(resolve => releaseSlowRequest = resolve)
+  console.warn = (...args) => warnings.push(args.join(' '))
+
+  globalThis.fetch = async (_url, options) => {
+    const { query, variables } = JSON.parse(options.body)
+    if (query.includes('createdAt'))
+      return json({ data: { user: { createdAt: `${new Date().getFullYear()}-01-01T00:00:00Z` } } })
+    if (query.includes('contributionsCollection'))
+      return json({ data: { user: { contributionsCollection: {
+        commitContributionsByRepository: repos.map(repository => ({ repository })),
+      } } } })
+    if (query.includes('pageInfo'))
+      return json({ data: { search: { pageInfo: { hasNextPage: false, endCursor: null }, edges: [] } } })
+
+    const index = Number(/repo:owner(\d+)\/repo/.exec(variables.q)[1])
+    active++
+    maximum = Math.max(maximum, active)
+    try {
+      await gate.wait()
+      // A batch barrier would keep request 10 queued behind request 0.
+      if (index === 0) {
+        let timer
+        try {
+          await Promise.race([
+            nextRequestStarted,
+            new Promise((_, reject) => {
+              timer = setTimeout(() => reject(new Error('PR-count requests stalled behind a batch barrier')), 1000)
+            }),
+          ])
+        }
+        finally {
+          clearTimeout(timer)
+        }
+      }
+      if (index === 10)
+        releaseSlowRequest()
+      completed.push(index)
+      if (index === 3)
+        return new Response('count unavailable', { status: 400 })
+      return json({ data: { search: { issueCount: index === 4 ? 0 : 1 } } })
+    }
+    finally {
+      active--
+    }
+  }
+
+  const { fetchGitHubContributions } = await import('../../src/providers/githubContributions.ts')
+  const result = fetchGitHubContributions('test-token', 'contributor')
+  await gate.open()
+  const sponsorships = await result
+  assert.equal(active, 0)
+  assert.equal(maximum, 10)
+  assert.equal(completed.length, repos.length)
+  assert.ok(completed.indexOf(10) < completed.indexOf(0))
+  assert.deepEqual(sponsorships.map(ship => ship.sponsor.login),
+    repos.filter((_, i) => i !== 3 && i !== 4).map(repo => repo.owner.login))
+  assert.ok(sponsorships.every(ship => ship.monthlyDollars === 1))
+  assert.equal(warnings.length, 1)
+}
+
 async function gitlab() {
   const contributors = Array.from({ length: 101 }, (_, i) => ({
     name: `user${i}`, email: `${i}@example.test`, commits: i < 24 ? 2 : 0,
@@ -193,6 +265,7 @@ async function circles(failImage) {
 const scenarios = {
   'github': () => github(false),
   'github-failure': () => github(true),
+  'github-counts': githubCounts,
   'gitlab': gitlab,
   'circles': () => circles(false),
   'circles-failure': () => circles(true),

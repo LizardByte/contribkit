@@ -23,6 +23,10 @@ describe('independent asynchronous work', () => {
       scenario: 'github-failure',
     },
     {
+      name: 'keeps PR-count requests capped and fills free slots without waiting for a batch',
+      scenario: 'github-counts',
+    },
+    {
       name: 'overlaps GitLab lookups with a cap, preserving contributor order and partial results',
       scenario: 'gitlab',
     },
