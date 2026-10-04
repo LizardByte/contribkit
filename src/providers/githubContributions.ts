@@ -120,16 +120,21 @@ async function discoverReposFromContributions(
 
     console.log(`[contribkit][githubContributions] querying contributions across ${years.length} years...`)
 
-    for (const { from, to } of years) {
+    const pLimit = await import('p-limit').then(r => r.default)
+    const limit = pLimit(10)
+    const reposByYear = await Promise.all(years.map(({ from, to }) => limit(async () => {
       try {
-        const repos = await fetchContributionsForYear(graphqlFetch, login, from, to)
-        for (const repo of repos) {
-          repoMap.set(repo.nameWithOwner, repo)
-        }
+        return await fetchContributionsForYear(graphqlFetch, login, from, to)
       }
       catch (e: any) {
         console.warn(`[contribkit][githubContributions] failed contributions query for ${from.slice(0, 4)}:`, e.message)
+        return []
       }
+    })))
+
+    for (const repos of reposByYear) {
+      for (const repo of repos)
+        repoMap.set(repo.nameWithOwner, repo)
     }
   }
   catch (e: any) {

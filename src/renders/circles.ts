@@ -39,8 +39,9 @@ export const circlesRenderer: ContribkitRenderer = {
     p.padding(config.width / 400)
     const circles = p(root).descendants().slice(1)
 
-    for (const circle of circles) {
-      composer.addRaw(await generateBadge(
+    const pLimit = await import('p-limit').then(r => r.default)
+    const limit = pLimit(15)
+    const badges = await Promise.all(circles.map(circle => limit(() => generateBadge(
         circle.x - circle.r,
         circle.y - circle.r,
         circle.data.sponsor,
@@ -54,8 +55,8 @@ export const circlesRenderer: ContribkitRenderer = {
         },
         0.5,
         config.imageFormat,
-      ))
-    }
+    ))))
+    composer.addRaw(badges.join(''))
 
     composer.height = config.width
 
