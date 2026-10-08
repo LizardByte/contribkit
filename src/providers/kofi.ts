@@ -251,7 +251,7 @@ function createKofiSponsorship(
     privacyLevel: latest.isPublic ? 'PUBLIC' : 'PRIVATE',
     tierName: latestRecurring?.tierName || 'Ko-fi',
     createdAt: sorted.at(-1)!.timestamp,
-    expireAt: activeExpirations.sort().at(-1),
+    expireAt: activeExpirations.toSorted((a, b) => a.localeCompare(b)).at(-1),
     isOneTime: recurring.length === 0,
     provider: 'kofi',
     raw: sorted,

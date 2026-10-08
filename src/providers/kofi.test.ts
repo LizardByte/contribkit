@@ -145,6 +145,7 @@ describe('ko-fi provider', () => {
     expect(sponsors).toHaveLength(1)
     expect(sponsors[0]).toMatchObject({
       monthlyDollars: 7,
+      expireAt: '2026-08-05T00:00:00.000Z',
       privacyLevel: 'PUBLIC',
       isOneTime: false,
       sponsor: {
