@@ -255,7 +255,7 @@ async function circles(failImage) {
   const badges = await Promise.all(packed.map(circle =>
     generateBadge(circle.x - circle.r, circle.y - circle.r, circle.data.sponsor, {
       name: false, boxHeight: circle.r * 2, boxWidth: circle.r * 2, avatar: { size: circle.r * 2 },
-    }, 0.5, config.imageFormat)))
+    }, 0.5, config.imageFormat, composer.getNextCropId())))
   badges.forEach(badge => composer.addRaw(badge))
   composer.height = config.width
   assert.equal(svg, composer.generateSvg())

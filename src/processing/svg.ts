@@ -1,5 +1,4 @@
 import type { BadgePreset, ContribkitRenderOptions, ImageFormat, Sponsor, Sponsorship } from '../types.js'
-import crypto from 'node:crypto'
 import { resizeImage } from './image.js'
 
 export function genSvgImage(
@@ -9,10 +8,8 @@ export function genSvgImage(
   radius: number,
   base64Image: string,
   imageFormat: ImageFormat,
+  cropId: string,
 ) {
-  // Unique clipPath id per element, ensuring duplicated images are properly rendered.
-  const hashInput = `${x}:${y}:${size}:${radius}:${base64Image}`
-  const cropId = `c${crypto.createHash('sha256').update(hashInput).digest('hex').slice(0, 6)}`
   return `
   <clipPath id="${cropId}">
     <rect x="${x}" y="${y}" width="${size}" height="${size}" rx="${size * radius}" ry="${size * radius}" />
@@ -27,6 +24,7 @@ export async function generateBadge(
   preset: BadgePreset,
   radius: number,
   imageFormat: ImageFormat,
+  cropId: string,
 ) {
   const { login } = sponsor
   let name = (sponsor.name || sponsor.login).trim()
@@ -59,15 +57,24 @@ export async function generateBadge(
     : ''
 
   return `<a ${linkAttributes}class="${preset.classes || 'contribkit-link'}" target="_blank" id="${login}">
-  ${nameSvg}${genSvgImage(x, y, size, radius, avatarBase64, imageFormat)}
+  ${nameSvg}${genSvgImage(x, y, size, radius, avatarBase64, imageFormat, cropId)}
 </a>`.trim()
 }
 
 export class SvgComposer {
   height = 0
   body = ''
+  private cropId = 0
 
-  constructor(public readonly config: Required<ContribkitRenderOptions>) {}
+  readonly config: Required<ContribkitRenderOptions>
+
+  constructor(config: Required<ContribkitRenderOptions>) {
+    this.config = config
+  }
+
+  getNextCropId() {
+    return `c${this.cropId++}`
+  }
 
   addSpan(height = 0) {
     this.height += height
@@ -96,7 +103,8 @@ export class SvgComposer {
         const x = offsetX + preset.boxWidth * i
         const y = this.height
         const radius = s.sponsor.type === 'Organization' ? 0.1 : 0.5
-        return await generateBadge(x, y, s.sponsor, preset, radius, this.config.imageFormat)
+        const cropId = this.getNextCropId()
+        return await generateBadge(x, y, s.sponsor, preset, radius, this.config.imageFormat, cropId)
       }))
 
     this.body += sponsorLine.join('\n')

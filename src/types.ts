@@ -75,7 +75,7 @@ export const outputFormats = ['svg', 'png', 'webp', 'json'] as const
 
 export type OutputFormat = typeof outputFormats[number]
 
-export type ProviderName = 'github' | 'patreon' | 'opencollective' | 'afdian' | 'polar' | 'liberapay' | 'githubContributors' | 'gitlabContributors' | 'crowdinContributors' | 'githubContributions'
+export type ProviderName = 'github' | 'patreon' | 'opencollective' | 'afdian' | 'polar' | 'liberapay' | 'kofi' | 'githubContributors' | 'gitlabContributors' | 'crowdinContributors' | 'githubContributions'
 export type HookResult<T> = PromiseLike<T | void | undefined | null> | T | void | undefined | null
 
 export type GitHubAccountType = 'user' | 'organization'
@@ -247,6 +247,30 @@ export interface ProvidersConfig {
      * @default false
      */
     logarithmicScaling?: boolean
+  }
+
+  kofi?: {
+    /**
+     * Local event store populated by the `kofi-webhook` command.
+     *
+     * @default './contribkit/kofi-events.json'
+     */
+    dataFile?: string
+    /**
+     * Number of days one-time tips affect the current sponsorship tier.
+     * Set to 0 to keep them active indefinitely.
+     *
+     * @default 30
+     */
+    tipEffectivity?: number
+    /**
+     * Number of days after a subscription payment the membership is considered active.
+     * Ko-fi does not send an event when a membership ends.
+     * Set to 0 to keep subscriptions active indefinitely.
+     *
+     * @default 35
+     */
+    subscriptionEffectivity?: number
   }
 }
 

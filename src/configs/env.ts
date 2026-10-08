@@ -53,6 +53,9 @@ export function loadEnv(): EnvConfig {
       maxContributions: Number(process.env.CONTRIBKIT_GITHUB_CONTRIBUTIONS_MAX) || undefined,
       logarithmicScaling: process.env.CONTRIBKIT_GITHUB_CONTRIBUTIONS_LOGARITHMIC === 'true',
     },
+    kofi: {
+      dataFile: process.env.CONTRIBKIT_KOFI_DATA_FILE,
+    },
   }
 
   // remove undefined keys

@@ -63,6 +63,11 @@ export async function loadConfig(inlineConfig: ContribkitConfig = {}): Promise<R
       ...config.afdian,
       ...inlineConfig.afdian,
     },
+    kofi: {
+      ...envConfig.kofi,
+      ...config.kofi,
+      ...inlineConfig.kofi,
+    },
     credentials: env.credentials,
   } as Required<ContribkitConfig>
 
