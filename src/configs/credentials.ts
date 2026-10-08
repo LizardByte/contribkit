@@ -18,6 +18,9 @@ export interface EnvCredentials {
   polar?: {
     token?: string
   }
+  kofi?: {
+    verificationToken?: string
+  }
   githubContributors?: {
     token?: string
   }
@@ -65,6 +68,9 @@ export function loadEnvCredentials(): EnvCredentials {
     },
     polar: {
       token: process.env.CONTRIBKIT_POLAR_TOKEN || process.env.POLAR_TOKEN,
+    },
+    kofi: {
+      verificationToken: process.env.CONTRIBKIT_KOFI_VERIFICATION_TOKEN || process.env.KOFI_VERIFICATION_TOKEN,
     },
     githubContributors: {
       token: process.env.CONTRIBKIT_GITHUB_CONTRIBUTORS_TOKEN,

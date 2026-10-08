@@ -126,7 +126,7 @@ async function fetchOpenCollectivePages(
 }
 
 async function fetchOpenCollectivePage(key: string, query: string) {
-  return await $fetch(API, {
+  const result = await $fetch(API, {
     method: 'POST',
     body: { query },
     headers: {
@@ -134,6 +134,10 @@ async function fetchOpenCollectivePage(key: string, query: string) {
       'Content-Type': 'application/json',
     },
   }) as any
+  if (result.errors?.length) {
+    throw new Error(`OpenCollective query errors: ${result.errors.map((error: Error) => error.message).join('; ')}`)
+  }
+  return result
 }
 
 function getNextOffset(offset: number, nodeCount: number, totalCount: number) {

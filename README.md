@@ -36,8 +36,11 @@ Supports:
   - [**Afdian**](https://afdian.com/)
   - [**Polar**](https://polar.sh/)
   - [**Liberapay**](https://liberapay.com/)
+  - [**Ko-fi**](https://ko-fi.com/)
 
 ## Usage
+
+Requires Node.js 22.18+, 24.11+, or 26+.
 
 Create `.env` file with:
 
@@ -119,6 +122,12 @@ CONTRIBKIT_POLAR_ORGANIZATION=
 ; Liberapay provider.
 ; The name of the profile.
 CONTRIBKIT_LIBERAPAY_LOGIN=
+
+; Ko-fi provider.
+; Copy the verification token from https://ko-fi.com/manage/webhooks
+CONTRIBKIT_KOFI_VERIFICATION_TOKEN=
+; Optional event store path populated by `contribkit kofi-webhook`.
+CONTRIBKIT_KOFI_DATA_FILE=./contribkit/kofi-events.json
 ```
 
 > Only one provider is required to be configured.
@@ -186,6 +195,9 @@ export default defineConfig({
   liberapay: {
     // ...
   },
+  kofi: {
+    // ...
+  },
 
   // For contributor providers:
   githubContributions: {
@@ -247,6 +259,31 @@ const sponsors = await fetchSponsors({
 Set credentials with environment variables such as `CONTRIBKIT_GITHUB_TOKEN`.
 
 Check the type definition or source code for more utils available.
+
+### Ko-fi Webhooks
+
+Ko-fi provides payment webhooks instead of an API for listing sponsors. Start the
+ContribKit receiver:
+
+```bash
+npx contribkit kofi-webhook
+```
+
+Expose `http://127.0.0.1:3456/kofi` through an HTTPS tunnel, then set that public
+URL on the [Ko-fi webhooks page](https://ko-fi.com/manage/webhooks). ContribKit
+verifies the webhook token, removes the token and email before persistence,
+deduplicates retries by `message_id`, and stores events in
+`./contribkit/kofi-events.json`.
+
+After Ko-fi sends a payment or test payment, generate the sponsor output normally:
+
+```bash
+npx contribkit --force
+```
+
+Ko-fi does not send an event when a membership ends. ContribKit therefore treats
+subscription payments as active for 35 days by default. Configure
+`kofi.subscriptionEffectivity` to change this window.
 
 ### Renderers
 

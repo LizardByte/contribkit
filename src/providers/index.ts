@@ -6,12 +6,14 @@ import { GitHubProvider } from './github.js'
 import { GitHubContributorsProvider } from './githubContributors.js'
 import { GitHubContributionsProvider } from './githubContributions.js'
 import { GitlabContributorsProvider } from './gitlabContributors.js'
+import { KofiProvider } from './kofi.js'
 import { LiberapayProvider } from './liberapay.js'
 import { OpenCollectiveProvider } from './opencollective.js'
 import { PatreonProvider } from './patreon.js'
 import { PolarProvider } from './polar.js'
 
 export * from './github.js'
+export * from './kofi.js'
 
 export const ProvidersMap = {
   github: GitHubProvider,
@@ -24,6 +26,7 @@ export const ProvidersMap = {
   githubContributions: GitHubContributionsProvider,
   gitlabContributors: GitlabContributorsProvider,
   crowdinContributors: CrowdinContributorsProvider,
+  kofi: KofiProvider,
 }
 
 export function guessProviders(config: ContribkitConfig) {
@@ -36,6 +39,7 @@ export function guessProviders(config: ContribkitConfig) {
     ['afdian', config.afdian?.userId && credentials.afdian?.token],
     ['polar', credentials.polar?.token],
     ['liberapay', config.liberapay?.login],
+    ['kofi', credentials.kofi?.verificationToken || config.kofi?.dataFile],
     ['githubContributors', config.githubContributors?.login && credentials.githubContributors?.token],
     ['githubContributions', config.githubContributions?.login && credentials.githubContributions?.token],
     ['gitlabContributors', credentials.gitlabContributors?.token && config.gitlabContributors?.repoId],

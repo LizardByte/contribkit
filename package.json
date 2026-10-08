@@ -24,7 +24,8 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.mjs"
     },
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./cli": "./dist/cli.mjs"
   },
   "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
@@ -36,28 +37,35 @@
     "bin",
     "dist"
   ],
+  "engines": {
+    "node": "^22.18.0 || ^24.11.0 || >=26.0.0"
+  },
   "scripts": {
     "build": "npm-run-all build:js build:types",
     "build:js": "vite build",
     "build:types": "tsc --project tsconfig.build.json",
     "dev": "tsx src/cli.ts",
-    "test": "npm-run-all test:unit test:report test:lint test:typecheck",
+    "test": "npm-run-all test:unit test:report test:upstream test:lint test:typecheck",
     "test:unit": "jest --coverage",
     "test:report": "jest --reporters=jest-junit",
     "test:lint": "eslint .",
     "test:typecheck": "tsc --noEmit",
     "prepublishOnly": "nr build",
-    "release": "bumpp && pnpm publish"
+    "release": "bumpp && pnpm publish",
+    "test:upstream": "vitest run"
   },
   "dependencies": {
     "@crowdin/crowdin-api-client": "^1.41.2",
-    "ansis": "^4.3.0",
+    "ansis": "^4.3.1",
     "cac": "^7.0.0",
     "consola": "^3.4.2",
     "dotenv": "^18.0.0",
     "ofetch": "^1.5.1",
-    "sharp": "^0.35.0",
-    "unconfig": "^7.5.0"
+    "sharp": "^0.35.3",
+    "unconfig": "^7.5.0",
+    "d3-hierarchy": "^3.1.2",
+    "normalize-url": "^9.0.1",
+    "p-limit": "^7.3.1"
   },
   "devDependencies": {
     "@antfu/ni": "^30.1.0",
@@ -70,25 +78,26 @@
     "@types/d3-hierarchy": "^3.1.7",
     "@types/node": "^25.9.1",
     "bumpp": "^12.0.0",
-    "d3-hierarchy": "^3.1.2",
     "eslint": "^10.4.0",
     "globals": "17.13.0",
     "jest": "30.5.2",
     "jest-environment-jsdom": "30.5.2",
     "jest-junit": "17.0.0",
     "jiti": "^2.7.0",
-    "normalize-url": "^9.0.0",
     "npm-run-all2": "9.0.3",
-    "p-limit": "^7.3.0",
     "tsx": "^4.22.3",
     "typescript": "^7.0.0",
-    "vite": "8.3.2"
+    "vite": "8.3.2",
+    "vitest": "^4.1.10"
   },
   "jest": {
     "collectCoverageFrom": [
       "src/**/*.{js,jsx}"
     ],
-    "testEnvironment": "jsdom"
+    "testEnvironment": "jsdom",
+    "roots": [
+      "<rootDir>/tests"
+    ]
   },
   "overrides": {
     "@codecov/vite-plugin": {

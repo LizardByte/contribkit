@@ -55,6 +55,7 @@ export const circlesRenderer: ContribkitRenderer = {
         },
         0.5,
         config.imageFormat,
+        composer.getNextCropId(),
     ))))
     composer.addRaw(badges.join(''))
 
