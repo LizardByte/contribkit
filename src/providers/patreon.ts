@@ -18,9 +18,9 @@ export async function fetchPatreonSponsors(token: string | undefined): Promise<S
   if (!token)
     throw new Error('Patreon token is required')
 
-  // Get current authenticated user's campaign ID (Everyone has one default campaign)
+  // Get the authenticated creator's campaign ID using API v2.
   const userData = await $fetch(
-    'https://www.patreon.com/api/oauth2/api/current_user/campaigns?include=null',
+    'https://www.patreon.com/api/oauth2/v2/campaigns',
     {
       method: 'GET',
       headers: {
