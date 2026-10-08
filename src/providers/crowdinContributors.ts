@@ -44,7 +44,7 @@ export async function fetchCrowdinContributors(
 
   // today's date in ISO 8601 format
   const dateTo = new Date().toISOString()
-  const dateFrom = project.data.createdAt
+  const dateFrom = project.data.createdAt ?? undefined
 
   const createReportRequestBody: ReportsModel.GenerateReportRequest = {
     name: 'top-members',
